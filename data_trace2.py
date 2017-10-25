@@ -6,7 +6,9 @@ def gen_sram_trace(
         filt_h  = 3, filt_w = 3,
         num_channels = 3,
         strides = 1, num_filt = 8,
-        sram_trace_file = "sram_log.csv",
+        filt_base = 1000000,
+        ifmap_base = 0,
+        sram_trace_file = "sram_read.csv",
         sram_write_trace_file = "sram_write.csv"
 ):
 
@@ -30,8 +32,8 @@ def gen_sram_trace(
     # Simulation part
     global_cycles = 0
 
-    filt_base = 1000000
-    ifmap_base = 0
+    #filt_base = 1000000
+    #ifmap_base = 0
 
     all_hlane_done = False
     all_vlane_done = False
