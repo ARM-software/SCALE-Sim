@@ -36,12 +36,14 @@ def gen_sram_trace(
     all_hlane_done = False
     all_vlane_done = False
     more_filters_remaining = True
+    #v_fold_done = False
     slide_ctr = 0
 
     h_base  = []
     #v_base  = []
     h_id    = []
     v_id    = []
+    shadow_v_id = []
     address_h_lane = []
     address_v_lane = []
     v_ctr = []
@@ -75,6 +77,7 @@ def gen_sram_trace(
     #Initialize v lane stuff here
     for i in range(num_v_lanes):
         v_id.append(i)
+        shadow_v_id.append(i)
         base_address = filt_base + i * r2c
         address_v_lane.append(base_address)
         v_ctr.append(0)
@@ -91,6 +94,7 @@ def gen_sram_trace(
             h_base[0] = 0
             address_h_lane[0] = h_base[0]
             all_hlane_done = False
+            v_fold_done = True
             slide_ctr = 0
             for i in range(num_h_lanes):
                 h_id[i] = i
@@ -133,6 +137,18 @@ def gen_sram_trace(
                         if v_id[v] > -1:
                             address_v_lane[v] += 1
 
+        max_id_vlane = max(v_id)
+
+        # This needs to be cleaner
+        if max_id_vlane == num_filt - 1:
+            ind = v_id.index(max_id_vlane)
+            if v_ctr[ind] == v_ctr_max_val - 1:
+                more_filters_remaining = False
+            else:
+                more_filters_remaining = True
+        else:
+            more_filters_remaining = True
+
 
         if all_hlane_done == False:
             for h in range(num_h_lanes):
@@ -165,6 +181,14 @@ def gen_sram_trace(
 
                            if h_id[h] == e2 - 1:
                                 all_hlane_done = True
+
+                                # The following three lines are for write trace generation
+                                shadow_v_id = [(v + num_v_lanes) for v in v_id]
+                                shadow_v_id[0] = v_id[0]
+                                if more_filters_remaining == True:
+                                    id = 0
+                                    base = 0
+
                                 slide_ctr = 0
 
                         if id > -1:
@@ -190,11 +214,13 @@ def gen_sram_trace(
                             address_h_lane[h] = h_base[h]
 
 
-                    if new_window[h] == True:
+
+                    if new_window[h] == True :
                         for v in range(num_v_lanes):
-                            ofmap_addr = h_id[h] * num_filt + v_id[v]
-                            clk  = global_cycles + v + r2c
-                            write_traces.append([clk, ofmap_addr])
+                           if shadow_v_id[v] < num_filt:
+                                ofmap_addr = h_id[h] * num_filt + shadow_v_id[v]
+                                clk  = global_cycles + v + r2c
+                                write_traces.append([clk, ofmap_addr])
 
                         new_window[h] = False
 
@@ -206,19 +232,22 @@ def gen_sram_trace(
         #if global_cycles >= 376:
         #   print("Break")
 
-        max_id_vlane = max(v_id)
+        #max_id_vlane = max(v_id)
 
         # This needs to be cleaner
-        if max_id_vlane == num_filt - 1:
-            ind = v_id.index(max_id_vlane)
-            if v_ctr[ind] == v_ctr_max_val - 1:
-                more_filters_remaining = False
-            else:
-                more_filters_remaining = True
-        else:
-            more_filters_remaining = True
+        #if max_id_vlane == num_filt - 1:
+        #    ind = v_id.index(max_id_vlane)
+        #    if v_ctr[ind] == v_ctr_max_val - 1:
+        #        more_filters_remaining = False
+        #    else:
+        #        more_filters_remaining = True
+        #else:
+        #    more_filters_remaining = True
+
+    #print("GC = " + str(global_cycles))
 
     #print(str(len(write_traces)))
+    #print(str(write_traces[-1]))
     #for i in range(len(write_traces)):
     #    print(write_traces[i])
     write_traces = sorted(write_traces, key=lambda x: x[0])
@@ -245,15 +274,17 @@ def gen_sram_trace(
             addr_list = str(clk) + ", " + str(addr) + ", "
             last_clk = clk
 
+    addr_list += "\n"
+    sram_write.write(addr_list)
     sram_write.close()
     sram.close()
 
 if __name__ == "__main__":
 
-    gen_sram_trace(dimensions=32,
-                   ifmap_h=418, ifmap_w=418,
-                   filt_h=3, filt_w=3,
-                   num_channels=3, strides=1,
-                   num_filt=16, sram_trace_file="yolo_tiny_layer1.csv", sram_write_trace_file="yolo_tiny_layer1_write.csv")
+    #gen_sram_trace(dimensions=32,
+    #               ifmap_h=418, ifmap_w=418,
+    #               filt_h=3, filt_w=3,
+    #               num_channels=3, strides=1,
+    #               num_filt=16, sram_trace_file="yolo_tiny_layer1.csv", sram_write_trace_file="yolo_tiny_layer1_write.csv")
 
-    #gen_sram_trace()
+    gen_sram_trace()
