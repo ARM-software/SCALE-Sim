@@ -108,7 +108,7 @@ def gen_sram_trace(
                 if global_cycles - v >= 0:
 
                     if (address_v_lane[v] != -1):
-                        v_sram_trace += str(address_v_lane[v]) + ", "
+                        v_sram_trace += str(int(address_v_lane[v])) + ", "
                     else:
                         v_sram_trace += " , "
 
@@ -267,13 +267,13 @@ def gen_sram_trace(
         #print(str(clk) + ", " + str(addr))
 
         if clk == last_clk:
-            addr_list += str(addr) +", "
+            addr_list += str(int(addr)) +", "
         else:
             addr_list += " \n"
             #print(addr_list)
             sram_write.write(addr_list)
 
-            addr_list = str(clk) + ", " + str(addr) + ", "
+            addr_list = str(clk) + ", " + str(int(addr)) + ", "
             last_clk = clk
 
     addr_list += "\n"

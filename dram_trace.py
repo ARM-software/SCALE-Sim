@@ -82,7 +82,7 @@ def dram_trace_read(
                             for i in range(int(out_data_per_clk)):
                                 if len(filter_buffer) > 0:
                                     p = filter_buffer.pop()
-                                    trace += str(p) + ", "
+                                    trace += str(int(p)) + ", "
                             trace += "\n"
                             dram_filter.write(trace)
                             c += 1
@@ -118,7 +118,7 @@ def dram_trace_read(
                             for i in range(out_data_per_clk):
                                 if len(ifmap_buffer) > 0:
                                     p = ifmap_buffer.pop()
-                                    trace += str(p) + ", "
+                                    trace += str(int(p)) + ", "
                             dram_ifmap.write(trace + "\n")
                             c += 1
 
@@ -144,7 +144,7 @@ def dram_trace_read(
             for i in range(int(out_data_per_clk)):
                 if len(filter_buffer) > 0:
                     p = filter_buffer.pop()
-                    trace += str(p) + ", "
+                    trace += str(int(p)) + ", "
             trace += "\n"
             dram_filter.write(trace)
             c += 1
@@ -163,7 +163,7 @@ def dram_trace_read(
             for i in range(int(out_data_per_clk)):
                 if len(ifmap_buffer) > 0:
                     p = ifmap_buffer.pop()
-                    trace += str(p) + ", "
+                    trace += str(int(p)) + ", "
             trace += "\n"
             dram_ifmap.write(trace)
             c += 1

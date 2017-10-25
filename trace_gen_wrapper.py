@@ -90,7 +90,7 @@ def gen_all_traces(
 
 if __name__ == "__main__":
     dimensions = 16
-    sram_size = 16 * 1024
+    sram_size = 32 * 1024
 
     yolo_tiny = open("yolo_tiny.csv", 'r')
     bw        = open("yolo_tiny_avg_bw.csv", 'w')
