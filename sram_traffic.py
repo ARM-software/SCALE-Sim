@@ -39,6 +39,8 @@ def gen_sram_write_trace(
             num_left -= d
 
         fwrite.close()
+        return(cycl)
+
 
 def gen_trace_one_fold(
         d = 4,
@@ -94,7 +96,7 @@ def gen_trace_one_fold(
     all_v_done = False
     cycles = 0
 
-    print(global_cycles)
+    #print(global_cycles)
 
     while not all_done:
         ifmap_trace  = ""
@@ -257,13 +259,13 @@ def sram_traffic(
             v_id.append(id)
             v_base.append(base)
 
-        gen_sram_write_trace(
-            v_id=v_id,
-            e2=e2, r2c=r2c,
-            global_cycles=global_cycles,
-            dimensions=d, v_use=min(v_rem,d),
-            sram_write_trace_file=sram_write_trace_file
-        )
+        final = gen_sram_write_trace(
+                    v_id=v_id,
+                    e2=e2, r2c=r2c,
+                    global_cycles=global_cycles,
+                    dimensions=d, v_use=min(v_rem,d),
+                    sram_write_trace_file=sram_write_trace_file
+                )
 
         global_cycles = gen_trace_one_fold(
                                     d=d,
@@ -277,12 +279,14 @@ def sram_traffic(
                             )
 
         global_cycles -= 1
-        print(global_cycles)
+        #print(global_cycles)
 
         del(v_id[:])
         del(v_base[:])
 
         v_rem -= min(d, v_rem)
+
+    print("Compute finished at: " + str(final))
 
 
 if __name__ == "__main__":
