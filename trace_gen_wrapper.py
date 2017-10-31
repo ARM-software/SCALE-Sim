@@ -54,7 +54,7 @@ def gen_all_traces(
         sram_write_trace_file= sram_write_trace_file,
         dram_write_trace_file= dram_ofmap_trace_file
     )
-'''
+
     dram_activation_bw = 0
     num_clks = 0
     num_bytes = 0
@@ -95,24 +95,29 @@ def gen_all_traces(
     log = str(dram_activation_bw) + ", " + str(dram_filter_bw) + ", " + str(dram_ofmap_bw) + ","
     print(log)
     return log
-'''
+
 
 def test():
+    test_fc1_24x24 = [27, 37, 512, 27, 37, 512, 1, 24, 1]
+    test_yolo_tiny_conv1_24x24 = [418, 418, 3, 3, 3, 16, 1, 24, 1]
+
+    #param = test_fc1_24x24
+    param = test_yolo_tiny_conv1_24x24
 
     # The parameters for 1st layer of yolo_tiny
-    ifmap_h = 418
-    ifmap_w = 418
-    num_channels = 3
+    ifmap_h = param[0]
+    ifmap_w = param[1]
+    num_channels = param[2]
 
-    filt_h = 3
-    filt_w = 3
-    num_filters = 16
+    filt_h = param[3]
+    filt_w = param[4]
+    num_filters = param[5] #16
 
-    strides = 1
+    strides = param[6]
 
     # Model parameters
-    dimensions = 32 #16
-    word_sz = 1
+    dimensions = param[7] #32 #16
+    word_sz = param[8]
 
     filter_sram_size = 1 * 1024
     ifmap_sram_size = 1 * 1024

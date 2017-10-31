@@ -2,36 +2,36 @@ import math
 
 
 def gen_sram_write_trace(
-        dimensions=4,
+        d_h= 4, d_v = 4,
         v_id = [], e2 = 25, r2c = 27, v_use = 4,
         global_cycles = 0,
         sram_write_trace_file = "sram_write.csv"
     ):
         t_last_out = []
 
-        for v in range(dimensions):
+        for v in range(int(d_v)):
             if v == 0:
-                t_last_out.append(global_cycles + dimensions)
+                t_last_out.append(global_cycles + d_h)
             else:
                 val =t_last_out[v-1] + 1
                 t_last_out.append(val)
 
-        num_folds = math.ceil(e2/dimensions)
+        num_folds = math.ceil(e2/d_h)
         num_left = e2
 
         fwrite = open(sram_write_trace_file, 'a')
 
         for i in range(num_folds):
-            d = int(min(dimensions, num_left))
+            d = int(min(d_h, num_left))
 
-            for j in range(dimensions):
+            for j in range(int(d_v)):
                 if v_id[j] > -1:
                     cycl = t_last_out[j] + max(r2c, v_use)
                     trace = str(cycl) + ", "
                     t_last_out[j] = cycl
 
                     for k in range(d):
-                        add = v_id[j] * e2 + i * dimensions + k
+                        add = v_id[j] * e2 + i * d_h + k
                         trace += str(add) + ", "
 
                     fwrite.write(trace + "\n")
@@ -43,7 +43,7 @@ def gen_sram_write_trace(
 
 
 def gen_trace_one_fold(
-        d = 4,
+        d_h = 4, d_v =4,
         ifmap_w = 7,
         filt_w = 3,
         num_channels = 3,
@@ -67,7 +67,7 @@ def gen_trace_one_fold(
     h_addr = []
     slide_ctr   = 0
 
-    for i in range(d):
+    for i in range(int(d_h)):
         if i == 0:
             base = 0
             slide_ctr += 1
@@ -87,6 +87,8 @@ def gen_trace_one_fold(
         h_addr.append(base)
         h_id.append(i)
 
+
+    for i in range(int(d_v)):
         v_ctr.append(0)
         addr = v_base[i]
         v_addr.append(addr)
@@ -102,14 +104,51 @@ def gen_trace_one_fold(
         ifmap_trace  = ""
         filter_trace = ""
 
-        for i in range(d):
+        # For v lanes
+        for j in range(int(d_v)):
+            adj_cycl = cycles - j
+
+            if adj_cycl > 0:
+                if adj_cycl % r2c == 0:
+
+                    # For all the filters
+                    if v_id[j] > -1:
+                        v_ctr[j] += 1
+
+                        if v_ctr[j] < max_v_counts:
+                            v_addr[j] = v_base[j]
+                        else:
+                            if v_id[j] == max_v_id:
+                                all_v_done = True
+
+                            v_id[j] = -1
+                else:
+                    if v_id[j] > -1:
+                        v_addr[j] += 1
+
+                if v_id[j] > -1:
+                    filter_trace += str(v_addr[j]) + ", "
+                else:
+                    filter_trace += ", "
+
+            elif adj_cycl == 0:
+                if v_id[j] > -1:
+                    filter_trace += str(v_addr[j]) + ", "
+                else:
+                    filter_trace += ", "
+
+            else:
+                filter_trace += ", "
+
+        # For h lanes
+        for i in range(int(d_h)):
             adj_cycl = cycles - i
 
             if adj_cycl > 0:
                 if adj_cycl % r2c == 0:
 
                     # Step 1 : Check the incremented id and slide to new base address
-                    id = (h_id[i] + d)
+                    id = (h_id[i] + d_h)
 
                     if id >=e2:
                         h_id[i] = -1
@@ -117,7 +156,7 @@ def gen_trace_one_fold(
                     if h_id[i] > -1:
 
                         if i == 0:
-                            h_ind = d - 1
+                            h_ind = d_h - 1
                         else:
                             h_ind = i - 1
 
@@ -134,42 +173,20 @@ def gen_trace_one_fold(
                         h_addr[i] = base
                         h_id[i]   = id
 
-                    # For all the filters
-                    if v_id[i] > -1:
-                        v_ctr[i] += 1
-
-                        if v_ctr[i] < max_v_counts:
-                            v_addr[i] = v_base[i]
-                        else:
-                            if v_id[i] == max_v_id:
-                                all_v_done = True
-
-                            v_id[i] = -1
 
                 elif adj_cycl % rc == 0:
                     if h_id[i] > -1:
                         add = 1 + (ifmap_w - filt_w) * num_channels
                         h_addr[i] += add
 
-                    if v_id[i] > -1:
-                        v_addr[i] += 1
-
                 else:
                     if h_id[i] > -1:
                         h_addr[i] += 1
-
-                    if v_id[i] > -1:
-                        v_addr[i] += 1
 
                 if h_id[i] > -1:
                     ifmap_trace += str(h_addr[i]) + ", "
                 else:
                     ifmap_trace += ", "
-
-                if v_id[i] > -1:
-                    filter_trace += str(v_addr[i]) + ", "
-                else:
-                    filter_trace += ", "
 
             elif adj_cycl == 0:
 
@@ -178,14 +195,8 @@ def gen_trace_one_fold(
                 else:
                     ifmap_trace+= ", "
 
-                if v_id[i] > -1:
-                    filter_trace += str(v_addr[i]) + ", "
-                else:
-                    filter_trace += ", "
-
             else:
                 ifmap_trace += ", "
-                filter_trace += ", "
 
         trace = str(global_cycles) + ", " + filter_trace + ifmap_trace + "\n"
         sram_read.write(trace)
@@ -218,16 +229,16 @@ def sram_traffic(
     E_w = (ifmap_w - filt_w + strides) / strides
 
     e2 = E_h * E_w
-    r2c = filt_h * filt_h * num_channels
+    r2c = filt_h * filt_w * num_channels
     rc = filt_w * num_channels
     h2 = ifmap_w * ifmap_h
 
     num_h_lanes = min(dimensions, e2)
     num_v_lanes = min(dimensions, num_filt)
 
-    d = min(num_h_lanes, num_v_lanes)
-    num_h_lanes = d
-    num_v_lanes = d
+    #d = min(num_h_lanes, num_v_lanes)
+    #num_h_lanes = d
+    #num_v_lanes = d
 
     # Simulation part
     global_cycles = 0
@@ -239,8 +250,8 @@ def sram_traffic(
     f1 = open(sram_write_trace_file, 'w')
     f1.close()
 
-    num_folds = math.ceil(num_filt / d)
-    max_v_counts = math.ceil(e2 / d)
+    num_folds = math.ceil(num_filt / num_v_lanes)
+    max_v_counts = math.ceil(e2 / num_h_lanes)
 
     v_rem = num_filt
 
@@ -248,9 +259,9 @@ def sram_traffic(
         v_base = []
         v_id = []
 
-        for i in range(d):
+        for i in range(int(num_v_lanes)):
             if i < v_rem:
-                id = fold * d + i
+                id = fold * num_v_lanes + i
                 base = id * r2c + filt_base
             else:
                 id = -1
@@ -263,12 +274,13 @@ def sram_traffic(
                     v_id=v_id,
                     e2=e2, r2c=r2c,
                     global_cycles=global_cycles,
-                    dimensions=d, v_use=min(v_rem,d),
+                    d_h = num_h_lanes, d_v = num_v_lanes,
+                    v_use=min(v_rem,num_v_lanes),
                     sram_write_trace_file=sram_write_trace_file
                 )
 
         global_cycles = gen_trace_one_fold(
-                                    d=d,
+                                    d_h = num_h_lanes, d_v = num_v_lanes,
                                     ifmap_w=ifmap_w, filt_w=filt_w,
                                     num_channels=num_channels, strides=strides,
                                     E_w=E_w, r2c=r2c, e2=e2, rc=rc,
@@ -284,18 +296,18 @@ def sram_traffic(
         del(v_id[:])
         del(v_base[:])
 
-        v_rem -= min(d, v_rem)
+        v_rem -= min(num_v_lanes, v_rem)
 
     print("Compute finished at: " + str(final))
 
 
 if __name__ == "__main__":
     sram_traffic(
-                    dimensions=14,
-                    ifmap_h=20, ifmap_w=20,
-                    filt_h=3, filt_w=3,
-                    num_channels=3, strides=1,
-                    num_filt=16,
+                    dimensions=24,
+                    ifmap_h=27, ifmap_w=37,
+                    filt_h=27, filt_w=37,
+                    num_channels=512, strides=1,
+                    num_filt=512,
                     sram_read_trace_file="sram_read.csv",
                     sram_write_trace_file="sram_write.csv",
                    )
