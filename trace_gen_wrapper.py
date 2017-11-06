@@ -131,9 +131,13 @@ def test():
     dimensions = param[7] #32 #16
     word_sz = param[8]
 
-    filter_sram_size = 512 * 1024
-    ifmap_sram_size = 512 * 1024
-    ofmap_sram_size = 512 * 1024
+    #filter_sram_size = 512 * 1024
+    #ifmap_sram_size = 512 * 1024
+    #ofmap_sram_size = 512 * 1024
+
+    filter_sram_size = 256 * 1024
+    ifmap_sram_size = 256 * 1024
+    ofmap_sram_size = 256 * 1024
 
     filter_base = 1000000 * 100
     ifmap_base = 0
