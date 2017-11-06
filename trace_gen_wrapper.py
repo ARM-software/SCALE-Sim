@@ -55,7 +55,13 @@ def gen_all_traces(
         dram_write_trace_file= dram_ofmap_trace_file
     )
 
-    dram_activation_bw = 0
+
+def gen_avg_bw(dram_ifmap_trace_file, dram_filter_trace_file,
+               dram_ofmap_trace_file, sram_write_trace_file
+               ):
+
+
+    min_clk = 0
     num_clks = 0
     num_bytes = 0
     f = open(dram_ifmap_trace_file, 'r')
@@ -100,9 +106,15 @@ def gen_all_traces(
 def test():
     test_fc1_24x24 = [27, 37, 512, 27, 37, 512, 1, 24, 1]
     test_yolo_tiny_conv1_24x24 = [418, 418, 3, 3, 3, 16, 1, 24, 1]
+    test_mdnet_conv1_24x24 = [107, 107, 3, 7, 7, 96, 2, 24, 1]
+    test_yolov2_conv4_24x24 = [104, 104, 128, 1, 1, 64, 1, 24, 1]
+
+    test_yolov2_conv21_24x24 = [16, 11, 3072, 3, 3, 1024, 1, 24, 1]
 
     #param = test_fc1_24x24
-    param = test_yolo_tiny_conv1_24x24
+    #param = test_yolo_tiny_conv1_24x24
+    #param = test_mdnet_conv1_24x24
+    param = test_yolov2_conv21_24x24
 
     # The parameters for 1st layer of yolo_tiny
     ifmap_h = param[0]
@@ -119,11 +131,11 @@ def test():
     dimensions = param[7] #32 #16
     word_sz = param[8]
 
-    filter_sram_size = 1 * 1024
-    ifmap_sram_size = 1 * 1024
-    ofmap_sram_size = 1 * 1024
+    filter_sram_size = 512 * 1024
+    ifmap_sram_size = 512 * 1024
+    ofmap_sram_size = 512 * 1024
 
-    filter_base = 1000000
+    filter_base = 1000000 * 100
     ifmap_base = 0
 
     # Trace files
