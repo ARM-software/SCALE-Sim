@@ -214,8 +214,7 @@ def gen_trace_one_fold(
 
 
 def sram_traffic(
-        dimensions_h=4,
-        dimensions_v=4,
+        dimensions=4,
         ifmap_h=7, ifmap_w=7,
         filt_h=3, filt_w=3,
         num_channels=3,
@@ -234,8 +233,8 @@ def sram_traffic(
     rc = filt_w * num_channels
     h2 = ifmap_w * ifmap_h
 
-    num_h_lanes = min(dimensions_h, e2)
-    num_v_lanes = min(dimensions_v, num_filt)
+    num_h_lanes = min(dimensions, e2)
+    num_v_lanes = min(dimensions, num_filt)
 
     #d = min(num_h_lanes, num_v_lanes)
     #num_h_lanes = d
@@ -304,8 +303,7 @@ def sram_traffic(
 
 if __name__ == "__main__":
     sram_traffic(
-                    dimensions_h=24,
-                    dimensions_v=24,
+                    dimensions=24,
                     ifmap_h=27, ifmap_w=37,
                     filt_h=27, filt_w=37,
                     num_channels=512, strides=1,

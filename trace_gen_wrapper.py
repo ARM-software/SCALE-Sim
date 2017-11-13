@@ -22,7 +22,8 @@ def gen_all_traces(
     ):
 
     sram.sram_traffic(
-        dimensions=dimentions,
+        dimensions_h=dimentions,
+        dimensions_v=dimentions,
         ifmap_h=ifmap_h, ifmap_w=ifmap_w,
         filt_h=filt_h, filt_w=filt_w,
         num_channels=num_channels,
@@ -55,50 +56,155 @@ def gen_all_traces(
         dram_write_trace_file= dram_ofmap_trace_file
     )
 
+    bw_numbers = gen_bw_numbers(dram_ifmap_trace_file, dram_filter_trace_file, dram_ofmap_trace_file, sram_write_trace_file)
 
-def gen_avg_bw(dram_ifmap_trace_file, dram_filter_trace_file,
-               dram_ofmap_trace_file, sram_write_trace_file
-               ):
+    return bw_numbers
 
+def gen_max_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
+                    dram_ofmap_trace_file, sram_write_trace_file
+                    ):
 
-    min_clk = 0
-    num_clks = 0
+    max_dram_activation_bw = 0
     num_bytes = 0
+    max_dram_act_clk = ""
     f = open(dram_ifmap_trace_file, 'r')
 
     for row in f:
-        num_clks += 1
-        num_bytes += len(row.split(',')) - 2
-
-    dram_activation_bw = num_bytes / num_clks
+        clk = row.split(',')[0]
+        num_bytes = len(row.split(',')) - 2
+        
+        
+        if max_dram_activation_bw < num_bytes:
+            max_dram_activation_bw = num_bytes
+            max_dram_act_clk = clk
     f.close()
 
-    dram_filter_bw = 0
-    num_clks = 0
+    max_dram_filter_bw = 0
     num_bytes = 0
+    max_dram_filt_clk = ""
     f = open(dram_filter_trace_file, 'r')
 
     for row in f:
-        num_clks += 1
-        num_bytes += len(row.split(',')) - 2
+        clk = row.split(',')[0]
+        num_bytes = len(row.split(',')) - 2
 
-    dram_filter_bw = num_bytes / num_clks
+       # if num_bytes > 24:
+       #     print(str(row))
+        
+        if max_dram_filter_bw < num_bytes:
+            max_dram_filter_bw = num_bytes
+            max_dram_filt_clk = clk
+
     f.close()
 
-    dram_ofmap_bw = 0
-    num_clks = 0
+    max_dram_ofmap_bw = 0
     num_bytes = 0
+    max_dram_ofmap_clk = ""
     f = open(dram_ofmap_trace_file, 'r')
 
     for row in f:
-        num_clks += 1
-        num_bytes += len(row.split(',')) - 2
+        clk = row.split(',')[0]
+        num_bytes = len(row.split(',')) - 2
 
-    dram_ofmap_bw = num_bytes / num_clks
+        if max_dram_ofmap_bw < num_bytes:
+            max_dram_ofmap_bw = num_bytes
+            max_dram_ofmap_clk = clk
+
+    f.close()
+    
+    max_sram_ofmap_bw = 0
+    num_bytes = 0
+    f = open(sram_write_trace_file, 'r')
+
+    for row in f:
+        num_bytes = len(row.split(',')) - 2
+
+        if max_sram_ofmap_bw < num_bytes:
+            max_sram_ofmap_bw = num_bytes
+
     f.close()
 
-    print("DRAM IFMAP Read BW, DRAM Filter Read BW, DRAM OFMAP Write BW,")
-    log = str(dram_activation_bw) + ", " + str(dram_filter_bw) + ", " + str(dram_ofmap_bw) + ","
+
+    #print("DRAM IFMAP Read BW, DRAM Filter Read BW, DRAM OFMAP Write BW, SRAM OFMAP Write BW")
+    log  = str(max_dram_activation_bw) + ", " + str(max_dram_filter_bw) + ", " 
+    log += str(max_dram_ofmap_bw) + "," + str(max_sram_ofmap_bw) + ", "
+    log += str(max_dram_act_clk) + ", " + str(max_dram_filt_clk) + ", "
+    log += str(max_dram_ofmap_clk) + ", "
+    #print(log)
+    return log
+
+
+def gen_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
+                    dram_ofmap_trace_file, sram_write_trace_file
+                    ):
+
+    min_clk = 100000
+    max_clk = -1
+
+    num_dram_activation_bytes = 0
+    f = open(dram_ifmap_trace_file, 'r')
+
+    for row in f:
+        num_dram_activation_bytes += len(row.split(',')) - 2
+        
+        elems = row.strip().split(',')
+        clk = float(elems[0])
+
+        if clk < min_clk:
+            min_clk = clk
+
+    f.close()
+
+    num_dram_filter_bytes = 0
+    f = open(dram_filter_trace_file, 'r')
+
+    for row in f:
+        num_dram_filter_bytes += len(row.split(',')) - 2
+
+        elems = row.strip().split(',')
+        clk = float(elems[0])
+
+        if clk < min_clk:
+            min_clk = clk
+
+    f.close()
+
+    num_dram_ofmap_bytes = 0
+    f = open(dram_ofmap_trace_file, 'r')
+
+    for row in f:
+        num_dram_ofmap_bytes += len(row.split(',')) - 2
+
+        elems = row.strip().split(',')
+        clk = float(elems[0])
+
+    f.close()
+    if clk > max_clk:
+        max_clk = clk
+    
+
+    num_sram_ofmap_bytes = 0
+    f = open(sram_write_trace_file, 'r')
+
+    for row in f:
+        num_sram_ofmap_bytes += len(row.split(',')) - 2
+        elems = row.strip().split(',')
+        clk = float(elems[0])
+
+    f.close()
+    if clk > max_clk:
+        max_clk = clk
+
+    delta_clk = max_clk - min_clk
+
+    dram_activation_bw  = num_dram_activation_bytes / delta_clk
+    dram_filter_bw      = num_dram_filter_bytes / delta_clk
+    dram_ofmap_bw       = num_dram_ofmap_bytes / delta_clk
+    sram_ofmap_bw       = num_sram_ofmap_bytes / delta_clk
+
+    print("DRAM IFMAP Read BW, DRAM Filter Read BW, DRAM OFMAP Write BW, SRAM OFMAP Write BW, Min clk, Max clk")
+    log = str(dram_activation_bw) + ", " + str(dram_filter_bw) + ", " + str(dram_ofmap_bw) + "," + str(sram_ofmap_bw) + ", "
+    log += str(min_clk) + ", " + str(max_clk) + ", "
     print(log)
     return log
 
@@ -107,14 +213,10 @@ def test():
     test_fc1_24x24 = [27, 37, 512, 27, 37, 512, 1, 24, 1]
     test_yolo_tiny_conv1_24x24 = [418, 418, 3, 3, 3, 16, 1, 24, 1]
     test_mdnet_conv1_24x24 = [107, 107, 3, 7, 7, 96, 2, 24, 1]
-    test_yolov2_conv4_24x24 = [104, 104, 128, 1, 1, 64, 1, 24, 1]
-
-    test_yolov2_conv21_24x24 = [16, 11, 3072, 3, 3, 1024, 1, 24, 1]
 
     #param = test_fc1_24x24
     #param = test_yolo_tiny_conv1_24x24
-    #param = test_mdnet_conv1_24x24
-    param = test_yolov2_conv21_24x24
+    param = test_mdnet_conv1_24x24
 
     # The parameters for 1st layer of yolo_tiny
     ifmap_h = param[0]
@@ -131,15 +233,11 @@ def test():
     dimensions = param[7] #32 #16
     word_sz = param[8]
 
-    #filter_sram_size = 512 * 1024
-    #ifmap_sram_size = 512 * 1024
-    #ofmap_sram_size = 512 * 1024
+    filter_sram_size = 1 * 1024
+    ifmap_sram_size = 1 * 1024
+    ofmap_sram_size = 1 * 1024
 
-    filter_sram_size = 256 * 1024
-    ifmap_sram_size = 256 * 1024
-    ofmap_sram_size = 256 * 1024
-
-    filter_base = 1000000 * 100
+    filter_base = 1000000
     ifmap_base = 0
 
     # Trace files

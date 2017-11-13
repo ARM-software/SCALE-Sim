@@ -12,168 +12,19 @@ def prune(input_list):
 
     return l
 
-'''
-def dram_trace_read(
-    filter_sram_sz  = 512 * 1024,        # 500 KB
-    ifmap_sram_sz   = 512 * 1024,
-    word_size       = 1,             # Word size in bytes
-    filt_base       = 1000000,
-    sram_trace_file = "sram_log.csv",
-    dram_filter_trace_file = "dram_filter_log.csv",
-    dram_ifmap_trace_file  = "dram_ifmap_log.csv"
-    ):
-
-    if not os.path.exists(sram_trace_file):
-        print("SRAM trace not found, please provide a valid path")
-        return
-
-
-    #filter_buffer  = [set(), set()]
-    #ifmap_buffer    = [set(), set()]
-    filter_buffer = set()
-    ifmap_buffer  = set()
-
-    t_fill_filter = -1
-    t_fill_ifmap  = -1
-
-    t_drain_filter = 0
-    t_drain_ifmap = 0
-
-    #data_per_clk_filter = 0
-    #data_per_clk_ifmap = 0
-    base_bw = 2
-
-    sram_requests = open(sram_trace_file, 'r')
-    dram_filter = open(dram_filter_trace_file, 'w')
-    dram_ifmap  = open(dram_ifmap_trace_file, 'w')
-
-    for row in sram_requests:
-        elems = row.strip().split(',')
-        elems = prune(elems)
-        elems = [float(x) for x in elems]
-        #print(elems)
-        clk = int(elems[0])
-
-        for e in range(1, len(elems)):
-            if elems[e] >= filt_base:
-
-                if elems[e] not in filter_buffer:
-
-                    # First check if space exist
-                    if len(filter_buffer) + word_size > filter_sram_sz:
-
-                        if t_fill_filter == -1:
-                            t_fill_filter = t_drain_filter - math.ceil(len(filter_buffer) / base_bw)
-
-                        time_to_fill = t_drain_filter - t_fill_filter
-
-                        if time_to_fill == 0:
-                            print("Drain time = " + str(t_drain_filter) + " Fill time = " + str(t_fill_filter))
-
-                        out_data_per_clk = math.ceil(len(filter_buffer) / time_to_fill)
-                        c = t_fill_filter
-                        while len(filter_buffer) > 0:
-                            trace = str(c) + ", "
-
-                            for i in range(int(out_data_per_clk)):
-                                if len(filter_buffer) > 0:
-                                    p = filter_buffer.pop()
-                                    trace += str(int(p)) + ", "
-                            trace += "\n"
-                            dram_filter.write(trace)
-                            c += 1
-
-                        t_fill_filter = t_drain_filter
-                        t_drain_filter = clk
-
-                    filter_buffer.add(elems[e])
-
-
-            else:
-            # --- Same thing but this time for ifmap rather then filters ---
-                if elems[e] not in ifmap_buffer:
-                # First check if space exist
-                    if len(ifmap_buffer) + word_size > ifmap_sram_sz:
-
-                        if t_fill_ifmap == -1:
-                            t_fill_ifmap = t_drain_ifmap - math.ceil(len(ifmap_buffer) / base_bw)
-
-                        time_to_fill = t_drain_ifmap - t_fill_ifmap
-
-                        out_data_per_clk = int(math.ceil(len(ifmap_buffer) / time_to_fill))
-
-                        # Here we are using delta clock cycles to chug
-                        c = t_fill_ifmap
-                        while len(ifmap_buffer) > 0:
-                            trace = str(c) + ", "
-                            for i in range(out_data_per_clk):
-                                if len(ifmap_buffer) > 0:
-                                    p = ifmap_buffer.pop()
-                                    trace += str(int(p)) + ", "
-                            dram_ifmap.write(trace + "\n")
-                            c += 1
-
-                        t_fill_ifmap = t_drain_ifmap
-                        t_drain_ifmap = clk
-
-                #Enter new data
-                ifmap_buffer.add(elems[e])
-
-    # Write the rest of the data
-    if len(filter_buffer) > 0:
-        #delta = clk - last_clk_filter
-        if t_fill_filter == -1:
-            t_fill_filter = t_drain_filter - math.ceil(len(filter_buffer) / base_bw)
-
-        time_to_fill = t_drain_filter - t_fill_filter
-
-        out_data_per_clk = math.ceil(len(filter_buffer) / time_to_fill)
-        c = t_fill_filter
-        while len(filter_buffer) > 0:
-            trace = str(c) + ", "
-
-            for i in range(int(out_data_per_clk)):
-                if len(filter_buffer) > 0:
-                    p = filter_buffer.pop()
-                    trace += str(int(p)) + ", "
-            trace += "\n"
-            dram_filter.write(trace)
-            c += 1
-
-    if len(ifmap_buffer) > 0:
-        if t_fill_ifmap == -1:
-            t_fill_ifmap = t_drain_ifmap - math.ceil(len(ifmap_buffer) / base_bw)
-
-        time_to_fill = t_drain_ifmap - t_fill_ifmap
-
-        out_data_per_clk = math.ceil(len(ifmap_buffer) / time_to_fill)
-        c = t_fill_ifmap
-        while len(ifmap_buffer) > 0:
-            trace = str(c) + ", "
-
-            for i in range(int(out_data_per_clk)):
-                if len(ifmap_buffer) > 0:
-                    p = ifmap_buffer.pop()
-                    trace += str(int(p)) + ", "
-            trace += "\n"
-            dram_ifmap.write(trace)
-            c += 1
-
-    dram_filter.close()
-    dram_ifmap.close()
-'''
 
 def dram_trace_read_v2(
         sram_sz         = 512 * 1024,
         word_sz_bytes   = 1,
         min_addr = 0, max_addr=1000000,
+        default_read_bw = 10,               # this is arbitrary
         sram_trace_file = "sram_log.csv",
         dram_trace_file = "dram_log.csv"
     ):
 
     t_fill_start    = -1
     t_drain_start   = 0
-    init_bw         = 4         # Taking an arbitrary initial bw of 4 bytes per cycle
+    init_bw         = default_read_bw         # Taking an arbitrary initial bw of 4 bytes per cycle
 
     sram = set()
 
@@ -186,7 +37,6 @@ def dram_trace_read_v2(
         elems = [float(x) for x in elems]
 
         clk = elems[0]
-        print("CLK = " + str(clk) + ", LEN: "+ str(len(elems) -1))
 
         for e in range(1, len(elems)):
 
@@ -201,9 +51,6 @@ def dram_trace_read_v2(
                     # Generate the filling trace from time t_fill_start to t_drain_start
                     cycles_needed   = t_drain_start - t_fill_start
                     words_per_cycle = math.ceil(len(sram) / (cycles_needed * word_sz_bytes))
-
-                    #if words_per_cycle > 24:
-                    #    print("Here")
 
                     c = t_fill_start
 
@@ -234,9 +81,6 @@ def dram_trace_read_v2(
         cycles_needed = t_drain_start - t_fill_start
         words_per_cycle = math.ceil(len(sram) / (cycles_needed * word_sz_bytes))
 
-        #if words_per_cycle > 24:
-        #    print("Here")
-
         c = t_fill_start
 
         while len(sram) > 0:
@@ -257,6 +101,7 @@ def dram_trace_read_v2(
 
 def dram_trace_write(ofmap_sram_size = 64,
                      data_width_bytes = 1,
+                     default_write_bw = 10,                     # this is arbitrary
                      sram_write_trace_file = "sram_write.csv",
                      dram_write_trace_file = "dram_write.csv"):
 
@@ -317,12 +162,12 @@ def dram_trace_write(ofmap_sram_size = 64,
             for i in range(1,len(elems)):
                 sram_buffer[filling_buf].add(elems[i])
 
-
+    #Drain the last fill buffer
     reasonable_clk = clk
     if len(sram_buffer[draining_buf]) > 0:
         #delta_clks = clk - last_clk
         #data_per_clk = math.ceil(len(sram_buffer[draining_buf]) / delta_clks)
-        data_per_clk = 10
+        data_per_clk = default_write_bw
         #print("Data per clk = " + str(data_per_clk))
 
         # Drain the data
@@ -336,16 +181,10 @@ def dram_trace_write(ofmap_sram_size = 64,
                     trace += str(addr) + ", "
 
             trace_file.write(trace + "\n")
+            reasonable_clk = max(c, clk)
 
-        reasonable_clk = max(c, clk)
-
-    #Drain the last fill buffer
-    #print("Draining data. CLK = " + str(clk))
     if len(sram_buffer[filling_buf]) > 0:
-        #delta_clks = clk - last_clk
-        #data_per_clk = math.ceil(len(sram_buffer[filling_buf]) / delta_clks)
-        #print("Data per clk = " + str(data_per_clk))
-        data_per_clk = 4
+        data_per_clk = default_write_bw
 
         # Drain the data
         c = reasonable_clk + 1
@@ -364,112 +203,8 @@ def dram_trace_write(ofmap_sram_size = 64,
     traffic.close()
     trace_file.close()
 
-def dram_trace_write_v2(ofmap_sram_size = 64,
-                     data_width_bytes = 1,
-                     sram_write_trace_file = "sram_write.csv",
-                     dram_write_trace_file = "dram_write.csv"):
-
-    traffic = open(sram_write_trace_file, 'r')
-    trace_file  = open(dram_write_trace_file, 'w')
-
-    last_clk = 0
-    clk = 0
-
-    sram_buffer = []
-    drain_buffer = []
-
-    first = True
-
-    for row in traffic:
-        elems = row.strip().split(',')
-        elems = prune(elems)
-        elems = [float(x) for x in elems]
-
-        clk = elems[0]
-
-        if clk == 151607:
-            print("Here")
-
-        if len(sram_buffer) + (len(elems) - 1) * data_width_bytes < ofmap_sram_size:
-            for i in range(1, len(elems)):
-                sram_buffer.append(elems[i])
-
-        else:
-            if first:
-                first = False
-                last_clk = clk
-
-                for i in range(len(sram_buffer)):
-                    drain_buffer.append(sram_buffer[i])
-
-                del(sram_buffer[:])
-
-            else:
-                delta_clk = clk - last_clk
-                words_per_cycl =  math.ceil(len(drain_buffer) / delta_clk)
-
-                c = last_clk
-                while len(drain_buffer) > 0:
-                    trace = str(c) + ", "
-
-                    for _ in range(int(words_per_cycl)):
-                        if len(drain_buffer) > 0:
-                            addr = drain_buffer.pop(0)
-                            trace += str(addr) + ", "
-
-                    trace_file.write(trace + "\n")
-                    c += 1
-
-                last_clk = clk
-                del(drain_buffer[:])
-
-                for i in range(len(sram_buffer)):
-                    drain_buffer.append(sram_buffer[i])
-
-                del(sram_buffer[:])
-
-            for i in range(1, len(elems)):
-                sram_buffer.append(elems[i])
-
-    if len(drain_buffer) > 0:
-        delta_clk = clk - last_clk
-        words_per_cycl = math.ceil(len(drain_buffer) / delta_clk)
-
-        c = last_clk
-        while len(drain_buffer) > 0:
-            trace = str(c) + ", "
-
-            for _ in range(int(words_per_cycl)):
-                if len(drain_buffer) > 0:
-                    addr = drain_buffer.pop(0)
-                    trace += str(addr) + ", "
-
-            trace_file.write(trace + "\n")
-            c += 1
-
-    if len(sram_buffer) > 0:
-        words_per_cycl = 4
-
-        c = clk
-        while len(sram_buffer) > 0:
-            trace = str(c) + ", "
-
-            for _ in range(int(words_per_cycl)):
-                if len(sram_buffer) > 0:
-                    addr = sram_buffer.pop(0)
-                    trace += str(addr) + ", "
-
-            trace_file.write(trace + "\n")
-            c += 1
-
-    #All traces done
-    traffic.close()
-    trace_file.close()
-
-
 if __name__ == "__main__":
-    #dram_trace_read_v2(min_addr=0, max_addr=1000000, dram_trace_file="ifmaps_dram_read.csv")
-    dram_trace_read_v2(min_addr=1000000, max_addr=100000000, dram_trace_file="filter_dram_read.csv",
-                       sram_trace_file="yolo_v2_Conv21_sram_read.csv")
+    dram_trace_read_v2(min_addr=0, max_addr=1000000, dram_trace_file="ifmaps_dram_read.csv")
+    dram_trace_read_v2(min_addr=1000000, max_addr=100000000, dram_trace_file="filter_dram_read.csv")
         #dram_trace_read(filter_sram_sz=1024, ifmap_sram_sz=1024, sram_trace_file="sram_read.csv")
         #dram_trace_write(ofmap_sram_size=1024,sram_write_trace_file="yolo_tiny_layer1_write.csv", dram_write_trace_file="yolo_tiny_layer1_dram_write.csv")
