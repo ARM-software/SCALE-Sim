@@ -99,13 +99,13 @@ SCALE-Sim accepts topology csv in the format shown below.
 
 Since SCALE-Sim is a CNN simulator please do not provide any layers other than convolutional or fully connected in the csv.
 You can take a look at 
-[yolo_tiny.csv](https://bitbucket.org/AnandS09/scale_sim/raw/cf9714d08e4d6b649939e9d2f3fb015c87cbc8e3/yolo_tiny.csv)
+[yolo_tiny.csv](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/topologies/yolo_tiny.csv)
 for your reference.
 
 ### Output
 
 Here is an example output dumped to stdout when running Yolo tiny (whose configuration is in yolo_tiny.csv):
-![screen_out](https://bytebucket.org/AnandS09/scale_sim/raw/4cab2d46fee5b3bf1965ceed56873008f9dfe2aa/images/output.png?token=67ebcc18c0620f0e54eceacd60179a984d0f32cc "std_out")
+![screen_out](https://github.com/AnandS09/SCALE-Sim/blob/master/images/output.png "std_out")
 
 Also, the simulator generates read write traces and summary logs at ```./outputs/<topology_name>```.
 There are three summary logs:
