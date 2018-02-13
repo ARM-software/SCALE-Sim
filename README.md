@@ -122,7 +122,9 @@ In addition cycle accurate SRAM/DRAM access logs are also dumped and could be ac
 ## Authors
 
 Ananda Samajdar, Georgia Institute of Technology
+
 Yuhao Zhu, University of Rochester
+
 Paul Whatmough, Arm Research, Boston, MA
 
 ## License
