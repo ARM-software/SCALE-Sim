@@ -3,7 +3,8 @@ import dram_trace as dram
 import sram_traffic as sram
 
 def gen_all_traces(
-        dimentions = 4,
+        array_h = 4,
+        array_w = 4,
         ifmap_h = 7, ifmap_w = 7,
         filt_h  = 3, filt_w = 3,
         num_channels = 3,
@@ -21,9 +22,10 @@ def gen_all_traces(
         dram_ofmap_trace_file = "dram_ofmap_write.csv"
     ):
 
+    print("Generating traces and bw numbers")
     sram.sram_traffic(
-        dimensions_h=dimentions,
-        dimensions_v=dimentions,
+        dimensions_h= array_h,
+        dimensions_v= array_w, 
         ifmap_h=ifmap_h, ifmap_w=ifmap_w,
         filt_h=filt_h, filt_w=filt_w,
         num_channels=num_channels,
@@ -33,6 +35,7 @@ def gen_all_traces(
         sram_write_trace_file=sram_write_trace_file
     )
 
+    #print("Generating DRAM traffic")
     dram.dram_trace_read_v2(
         sram_sz=ifmap_sram_size,
         word_sz_bytes=word_size_bytes,
@@ -88,9 +91,6 @@ def gen_max_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
         clk = row.split(',')[0]
         num_bytes = len(row.split(',')) - 2
 
-       # if num_bytes > 24:
-       #     print(str(row))
-        
         if max_dram_filter_bw < num_bytes:
             max_dram_filter_bw = num_bytes
             max_dram_filt_clk = clk
@@ -126,10 +126,10 @@ def gen_max_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
 
 
     #print("DRAM IFMAP Read BW, DRAM Filter Read BW, DRAM OFMAP Write BW, SRAM OFMAP Write BW")
-    log  = str(max_dram_activation_bw) + ", " + str(max_dram_filter_bw) + ", " 
-    log += str(max_dram_ofmap_bw) + "," + str(max_sram_ofmap_bw) + ", "
-    log += str(max_dram_act_clk) + ", " + str(max_dram_filt_clk) + ", "
-    log += str(max_dram_ofmap_clk) + ", "
+    log  = str(max_dram_activation_bw) + ",\t" + str(max_dram_filter_bw) + ",\t" 
+    log += str(max_dram_ofmap_bw) + ",\t" + str(max_sram_ofmap_bw) + ",\t"
+    log += str(max_dram_act_clk) + ",\t" + str(max_dram_filt_clk) + ",\t"
+    log += str(max_dram_ofmap_clk) + ","
     #print(log)
     return log
 
@@ -202,10 +202,15 @@ def gen_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
     dram_ofmap_bw       = num_dram_ofmap_bytes / delta_clk
     sram_ofmap_bw       = num_sram_ofmap_bytes / delta_clk
 
-    print("DRAM IFMAP Read BW, DRAM Filter Read BW, DRAM OFMAP Write BW, SRAM OFMAP Write BW, Min clk, Max clk")
-    log = str(dram_activation_bw) + ", " + str(dram_filter_bw) + ", " + str(dram_ofmap_bw) + "," + str(sram_ofmap_bw) + ", "
-    log += str(min_clk) + ", " + str(max_clk) + ", "
-    print(log)
+    units = " Bytes/cycle"
+    print("DRAM IFMAP Read BW  : \t" + str(dram_activation_bw) + units)
+    print("DRAM Filter Read BW : \t" + str(dram_filter_bw) + units)
+    print("DRAM OFMAP Write BW : \t" + str(dram_ofmap_bw) + units)
+    #print("SRAM OFMAP Write BW, Min clk, Max clk")
+    
+    log = str(dram_activation_bw) + ",\t" + str(dram_filter_bw) + ",\t" + str(dram_ofmap_bw) + ",\t" + str(sram_ofmap_bw) + ",\t"
+    log += str(min_clk) + ",\t" + str(max_clk) + ","
+    #print(log)
     return log
 
 
@@ -249,7 +254,8 @@ def test():
     dram_write_trace = "test_dram_write.csv"
 
     gen_all_traces(
-        dimentions= dimensions,
+        array_h = dimensions,
+        array_w = dimensions,
         ifmap_h= ifmap_h, ifmap_w= ifmap_w, num_channels=num_channels,
         filt_h= filt_h, filt_w= filt_w, num_filt= num_filters,
         strides= strides,

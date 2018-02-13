@@ -1,4 +1,6 @@
 import math
+#from progressbar import ProgressBar
+from tqdm import tqdm
 
 
 def gen_sram_write_trace(
@@ -256,7 +258,9 @@ def sram_traffic(
 
     v_rem = num_filt
 
-    for fold in range(num_folds):
+    #pbar = ProgressBar(maxval=100).start()
+    for fold in tqdm(range(num_folds)):
+    #for fold in range(num_folds):
         v_base = []
         v_id = []
 
@@ -298,8 +302,9 @@ def sram_traffic(
         del(v_base[:])
 
         v_rem -= min(num_v_lanes, v_rem)
+    #pbar.finish()
 
-    print("Compute finished at: " + str(final))
+    print("Compute finished at: " + str(final) + " cycles")
 
 
 if __name__ == "__main__":
