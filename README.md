@@ -4,7 +4,7 @@ SCALE sim is a CNN accelerator simulator, that provides cycle-accurate timing,
 power/energy, memory bandwidth and trace results for a
 specified accelerator configuration and neural network architecture.
 
-[Skip to Getting Started](#Getting-Started)
+[Skip to Getting Started](getting_started.md)
 
 ## Motivation
 
