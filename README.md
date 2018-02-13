@@ -1,4 +1,4 @@
-# **S**ystolic **C**NN **A**cce**LE**rator Simulator (SCALE Sim)#
+# **S**ystolic **C**NN **A**cce**LE**rator Simulator (SCALE Sim)
 
 SCALE sim is a CNN accelerator simulator, that provides cycle-accurate timing,
 power/energy, memory bandwidth and trace results for a
@@ -59,10 +59,6 @@ Usually in an ML-enable application, CNN is just one stage of the end-to-end pro
 Due to the modular interface design, users could choose to integrate SCALE sim with Gem5 or GemDroid for full-system simulation. This is particular helpful for researchers who do not wish to perform in-depth investigation of the CNN accelerator microarchitecture, but wish to integrate a decent CNN IP to obtain meaningful system-level characterization results.
 
 ## How does it work?
-[//]:#(Right now SCALE models a variable size systolic array, which computes convolution layers employing output stationary dataflow.)
-[//]:#(For the uninitiated, output stationary dataflow simply means that every MAC unit is responsible for generating on output feature map (OFMAP) pixel.)
-[//]:#(To do this, the design should ensure that all the required input feature map(IFMAP) pixels and corresponding filters are delivered to the respective PE in a proper sequence.)
-[//]:#(The reduction happens within the PE.)
 
 SCALE sim simulates a TPU-like systolic array for CNN computation.
 Due to the highly regular data-flow involved in CNNs, it is easy to estimate the storage, traffic, and computation metrics without actually performing the computation. 
@@ -78,7 +74,6 @@ Given a CNN topology, the current implementation of SCALE computes the output me
 ### 30 seconds to SCALE sim!
 
 Getting started is simple! SCALE-Sim is completely written in python. At the moment, it has dependencies on the following python packages. Make sure you have them in your environment.
-[//]:#(Once you have successfully cloned the repository, update the config file and run the command.)
 
 * os
 * subprocess
@@ -95,23 +90,12 @@ Getting started is simple! SCALE-Sim is completely written in python. At the mom
 
 The config file scale.cfg contains two sections, achitecture presets and network presets.  
 Here is sample of the config file.  
-![sample config](https://bytebucket.org/AnandS09/scale_sim/raw/cf9714d08e4d6b649939e9d2f3fb015c87cbc8e3/images/config_example_single.png?token=1ca95715abe2048d67ec584d63e2077a0fc4b170 "sample config")    
+![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example_single.png "sample config")    
 Architecture presets are the variable parameters for SCALE-Sim, like array size, memory etc.  
-
-
-[//]:#(The presets expect a range of values in comma separated fashion.)  
-[//]:#(```python)
-[//]:#(<var_name>: min_val, max_val)
-[//]:#(```)
-[//]:#(![sample preset](https://bytebucket.org/AnandS09/scale_sim/raw/1e7e57c7580548589b8a4118a15eba144e6b66e6/images/preset_example.png?token=eaec97261085908f49fee6414a6a4bfa02e63164 "sample preset")  )
-[//]:#(In this case SCALE-Sim will iterate from an array height of 2 to 64 in the course of runs.)
-[//]:#(In cases where we do not want to iterate over a range of value, just provide a single numeric value for the parameter. ) 
-[//]:#(![sample const preset](https://bytebucket.org/AnandS09/scale_sim/raw/ebeec1abb019cca66f0a52bef8ceb3ef1e614f96/images/const_preset.png?token=8fd0c89b258e5f11b614d3c48cc4a454d17a618d "const preset")  )
-[//]:#(In this case SCALE-Sim will run with an array size of 32x32 and not iterate.)
 
 Network preset contains just one field for now, that is the path to the topology csv file.  
 SCALE-Sim accepts topology csv in the format shown below.  
-![yolo_tiny topology](https://bytebucket.org/AnandS09/scale_sim/raw/cf9714d08e4d6b649939e9d2f3fb015c87cbc8e3/images/yolo_tiny_csv.png?token=958799e78eb7efae60df52ea1f8a8dfea7809b0a "yolo_tiny.csv")
+![yolo_tiny topology](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/yolo_tiny_csv.png "yolo_tiny.csv")
 
 Since SCALE-Sim is a CNN simulator please do not provide any layers other than convolutional or fully connected in the csv.
 You can take a look at 
