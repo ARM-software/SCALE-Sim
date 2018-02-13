@@ -121,8 +121,12 @@ In addition cycle accurate SRAM/DRAM access logs are also dumped and could be ac
 
 ## Authors
 
+Ananda Samajdar, Georgia Institute of Technology
+Yuhao Zhu, University of Rochester
+Paul Whatmough, Arm Research, Boston, MA
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.txt file for details
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 
