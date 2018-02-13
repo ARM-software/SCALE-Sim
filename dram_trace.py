@@ -1,5 +1,6 @@
 import os.path
 import math
+from tqdm import tqdm
 
 
 def prune(input_list):
@@ -31,6 +32,7 @@ def dram_trace_read_v2(
     sram_requests = open(sram_trace_file, 'r')
     dram          = open(dram_trace_file, 'w')
 
+    #for entry in tqdm(sram_requests):
     for entry in sram_requests:
         elems = entry.strip().split(',')
         elems = prune(elems)
