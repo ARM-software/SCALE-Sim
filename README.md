@@ -116,19 +116,19 @@ There are three summary logs:
 
 In addition cycle accurate SRAM/DRAM access logs are also dumped and could be accesses at ```./outputs/<topology_name>/layer_wise```
 
-
 ## Contributing
+
+Please send a [pull request](https://help.github.com/articles/creating-a-pull-request/).
 
 ## Authors
 
 Ananda Samajdar, Georgia Institute of Technology
 
-Yuhao Zhu, University of Rochester
+[Yuhao Zhu](http://yuhaozhu.com), University of Rochester
 
 Paul Whatmough, Arm Research, Boston, MA
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
 
