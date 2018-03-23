@@ -122,7 +122,7 @@ Please send a [pull request](https://help.github.com/articles/creating-a-pull-re
 
 ## Authors
 
-Ananda Samajdar, Georgia Institute of Technology
+[Ananda Samajdar](https://anands09.github.io), Georgia Institute of Technology
 
 [Yuhao Zhu](http://yuhaozhu.com), University of Rochester
 

@@ -5,7 +5,11 @@ import run_nets as r
 
 
 class scale:
+    def __init__(self):
+        self.sweep = False 
+
     def parse_config(self):
+        general = 'general'
         arch_sec = 'architecture_presets'
         net_sec  = 'network_presets'
         config_filename = "./scale.cfg"
@@ -13,6 +17,9 @@ class scale:
         config = cp.ConfigParser()
         config.read(config_filename)
     
+        ## Read the run name
+        self.run_name = config.get(general, 'run_name')
+
         ## Read the architecture_presets
         ## Array height min, max
         ar_h = config.get(arch_sec, 'ArrayHeight').split(',')
@@ -52,6 +59,7 @@ class scale:
         if len(ofmap_sram) > 1:
             self.osram_max = ofmap_sram[1].strip()
     
+        self.dataflow= config.get(arch_sec, 'Dataflow')
     
         ## Read network_presets
         ## For now that is just the topology csv filename
@@ -60,7 +68,14 @@ class scale:
 
 
     def run_scale(self):
-        self.parse_config()
+
+        if self.sweep == False:
+            self.parse_config()
+
+        df_string = "Output Stationary"
+        if self.dataflow == 'ws':
+            df_string = "Weight Stationary"
+
         print("====================================================")
         print("******************* SCALE SIM **********************")
         print("====================================================")
@@ -68,7 +83,8 @@ class scale:
         print("SRAM IFMAP: \t" + str(self.isram_min))
         print("SRAM Filter: \t" + str(self.fsram_min))
         print("SRAM OFMAP: \t" + str(self.osram_min))
-        print("CSV file path: \t" + self.topology_file)
+        print("CSV file path: \t" + self.topology_file) 
+        print("Dataflow: \t" + df_string)
         print("====================================================")
 
         net_name = self.topology_file.split('/')[-1].split('.')[0]
@@ -80,6 +96,7 @@ class scale:
                     array_h = int(self.ar_h_min),
                     array_w = int(self.ar_w_min),
                     net_name = net_name,
+                    data_flow = self.dataflow,
                     topology_file = self.topology_file
                 )
         
@@ -92,7 +109,12 @@ class scale:
             os.system("mkdir ./outputs")
         
         net_name = self.topology_file.split('/')[-1].split('.')[0]
-        path = "./outputs/" + net_name
+
+        path = "./output/scale_out"
+        if self.run_name == "":
+            path = "./outputs/" + net_name +"_"+ self.dataflow
+        else: 
+            path = "./outputs/" + self.run_name
 
         if not os.path.exists(path):
             os.system("mkdir " + path)
@@ -112,8 +134,21 @@ class scale:
         cmd = "mv " + path +"/*Conv* " + path +"/layer_wise"
         os.system(cmd)
 
+    def run_sweep(self):
+        self.parse_config()
+        self.sweep = True
+
+        data_flow_list = ['os', 'ws']
+
+        for df in data_flow_list:
+            self.dataflow = df
+            net_name = self.topology_file.split('/')[-1].split('.')[0]
+            self.run_name = net_name + "_" + df + "_" + self.ar_h_min + "x" + self.ar_w_min 
+            self.run_scale()
+
 if __name__ == "__main__":
     s = scale()
-    s.run_scale()
+    #s.run_scale()
+    s.run_sweep()
 
     
