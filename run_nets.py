@@ -1,6 +1,4 @@
 import trace_gen_wrapper as tg
-import sram_traffic as sram
-import dram_trace as dram
 import os
 import subprocess
 
@@ -33,7 +31,7 @@ def run_net( ifmap_sram_size=1,
 
     bw.write("IFMAP SRAM Size,\tFilter SRAM Size,\tOFMAP SRAM Size,\tConv Layer Num,\tDRAM IFMAP Read BW,\tDRAM Filter Read BW,\tDRAM OFMAP Write BW,\tSRAM Read BW,\tSRAM OFMAP Write BW, \n")
     maxbw.write("IFMAP SRAM Size,\tFilter SRAM Size,\tOFMAP SRAM Size,\tConv Layer Num,\tMax DRAM IFMAP Read BW,\tMax DRAM Filter Read BW,\tMax DRAM OFMAP Write BW,\tMax SRAM Read BW,\tMax SRAM OFMAP Write BW,\n")
-    cycl.write("Layer,\tCycles,\n")
+    cycl.write("Layer,\tCycles,\t% Utilization,\n")
 
     first = True
     
@@ -68,7 +66,7 @@ def run_net( ifmap_sram_size=1,
         bw_log = str(ifmap_sram_size) +",\t" + str(filter_sram_size) + ",\t" + str(ofmap_sram_size) + ",\t" + name + ",\t"
         max_bw_log = bw_log
 
-        bw_log += tg.gen_all_traces(array_h = array_h,
+        bw_str, util= tg.gen_all_traces(array_h = array_h,
                                     array_w = array_w,
                                     ifmap_h = ifmap_h, 
                                     ifmap_w = ifmap_w,
@@ -90,6 +88,7 @@ def run_net( ifmap_sram_size=1,
                                     dram_ofmap_trace_file= net_name + "_" + name + "_dram_ofmap_write.csv"
                                     )
 
+        bw_log += bw_str
         bw.write(bw_log + "\n")
 
         max_bw_log += tg.gen_max_bw_numbers(
