@@ -104,7 +104,8 @@ def run_net( ifmap_sram_size=1,
         last_line = subprocess.check_output(["tail","-1", net_name + "_" + name + "_sram_write.csv"] )
         clk = str(last_line).split(',')[0]
         clk = str(clk).split("'")[1]
-        line = name + ",\t" + clk + ",\n"
+        util_str = str(util)
+        line = name + ",\t" + clk +",\t" + util_str +",\n"
         cycl.write(line)
 
     bw.close()

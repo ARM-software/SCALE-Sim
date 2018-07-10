@@ -7,6 +7,8 @@ import run_nets as r
 class scale:
     def __init__(self):
         self.sweep = False 
+        #self.save_space = True
+        self.save_space = False
 
     def parse_config(self):
         general = 'general'
@@ -99,7 +101,6 @@ class scale:
                     data_flow = self.dataflow,
                     topology_file = self.topology_file
                 )
-        
         self.cleanup()
         print("************ SCALE SIM Run Complete ****************") 
 
@@ -131,24 +132,44 @@ class scale:
         cmd = "mkdir " + path +"/layer_wise"
         os.system(cmd)
 
-        cmd = "mv " + path +"/*Conv* " + path +"/layer_wise"
+        cmd = "mv " + path +"/*sram* " + path +"/layer_wise"
         os.system(cmd)
+
+        cmd = "mv " + path +"/*dram* " + path +"/layer_wise"
+        os.system(cmd)
+
+        if self.save_space == True: 
+            cmd = "rm -rf " + path +"/layer_wise"
+            os.system(cmd)
+
 
     def run_sweep(self):
         self.parse_config()
         self.sweep = True
 
         data_flow_list = ['os', 'ws']
+        #arr_h_list = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
+        #arr_w_list = [16384, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
+        #ifmap_sram_list = [256, 512, 1024]
+        #filter_sram_list = [256, 512, 1024]
+        #ofmap_sram_list = [128, 256, 512]
 
         for df in data_flow_list:
             self.dataflow = df
+
+            #for i in range(len(arr_h_list)):
+            #    self.ar_h_min = arr_h_list[i]
+            #    self.ar_w_min = arr_w_list[i]
+
             net_name = self.topology_file.split('/')[-1].split('.')[0]
             self.run_name = net_name + "_" + df + "_" + self.ar_h_min + "x" + self.ar_w_min 
+
             self.run_scale()
+
 
 if __name__ == "__main__":
     s = scale()
-    #s.run_scale()
-    s.run_sweep()
+    s.run_scale()
+    #s.run_sweep()
 
     

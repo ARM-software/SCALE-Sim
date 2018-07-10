@@ -76,9 +76,12 @@ def gen_all_traces(
         dram_write_trace_file= dram_ofmap_trace_file
     )
 
-    bw_numbers = gen_bw_numbers(dram_ifmap_trace_file, dram_filter_trace_file, dram_ofmap_trace_file, sram_write_trace_file, sram_read_trace_file)
+    bw_numbers, util = gen_bw_numbers(dram_ifmap_trace_file, dram_filter_trace_file, 
+                                    dram_ofmap_trace_file, sram_write_trace_file,
+                                    sram_read_trace_file,
+                                    array_h, array_w)
 
-    return bw_numbers
+    return bw_numbers, util
 
 def gen_max_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
                     dram_ofmap_trace_file, sram_write_trace_file, sram_read_trace_file
@@ -166,7 +169,8 @@ def gen_max_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
 
 def gen_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
                     dram_ofmap_trace_file, sram_write_trace_file, 
-                    sram_read_trace_file
+                    sram_read_trace_file,
+                    array_h, array_w        # These are needed for utilization calculation
                     ):
 
     min_clk = 100000
@@ -228,15 +232,17 @@ def gen_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
     
     num_sram_read_bytes = 0
     total_util = 0
+    #print("Opening " + sram_trace_file)
     f = open(sram_read_trace_file, 'r')
 
     for row in f:
         #num_sram_read_bytes += len(row.split(',')) - 2
         elems = row.strip().split(',')
         clk = float(elems[0])
-        util, valid_bytes = parse_sram_read_data(elems[1:-1])
+        util, valid_bytes = parse_sram_read_data(elems[1:-1], array_h, array_w)
         num_sram_read_bytes += valid_bytes
         total_util += util
+        #print("Total Util " + str(total_util) + ", util " + str(util))
 
     f.close()
     sram_clk = clk
@@ -250,6 +256,7 @@ def gen_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
     dram_ofmap_bw       = num_dram_ofmap_bytes / delta_clk
     sram_ofmap_bw       = num_sram_ofmap_bytes / delta_clk
     sram_read_bw        = num_sram_read_bytes / delta_clk
+    print("total_util: " + str(total_util) + ", sram_clk: " + str(sram_clk))
     avg_util            = total_util / sram_clk * 100
 
     units = " Bytes/cycle"
@@ -265,21 +272,35 @@ def gen_bw_numbers( dram_ifmap_trace_file, dram_filter_trace_file,
     #print(log)
     return log, avg_util
 
+#def test_util_calc(filename, array_h, array_w):
+#    total_util = 0
+#     f = open(filename, 'r')
+#
+#     for row in f:
+#         elems = row.strip().split(',')
+#         clk = float(elems[0])
+#         util, valid_bytes = parse_sram_read_data(elems[1:-1], array_h, array_w)
+#         num_sram_read_bytes += valid_bytes
+#         total_util += util
+#
+#     print()
 
-def parse_sram_read_data(elems):
-    half = int(len(elems) /2)
+def parse_sram_read_data(elems, array_h, array_w):
+    #half = int(len(elems) /2)
     nz_row = 0
     nz_col = 0
 
     for i in range(len(elems)):
         e = elems[i]
         if e != ' ':
-            if i < half:
+            #if i < half:
+            if i < array_h:
                 nz_row += 1
             else:
                 nz_col += 1
 
-    util = (nz_row * nz_col) / (half * half)
+    #util = (nz_row * nz_col) / (half * half)
+    util = (nz_row * nz_col) / (array_h * array_w)
     data = nz_row + nz_col 
     
     return util, data
