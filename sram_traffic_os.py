@@ -35,19 +35,19 @@ def sram_traffic(
 
     cycles = 0
 
-    read_cycles = gen_read_trace(
-                        cycle = cycles,
-                        dim_rows = dimension_rows,
-                        dim_cols = dimension_cols,
-                        num_v_fold = int(num_v_fold),
-                        num_h_fold = int(num_h_fold),
-                        ifmap_h = ifmap_h, ifmap_w= ifmap_w,
-                        filt_h= filt_h, filt_w= filt_w,
-                        num_channels= num_channels, stride=strides,
-                        ofmap_h= int(E_h), ofmap_w= int(E_w), num_filters = num_filt,
-                        filt_base= filt_base, ifmap_base= ifmap_base,
-                        sram_read_trace_file= sram_read_trace_file
-                        )
+    read_cycles, util = gen_read_trace(
+                            cycle = cycles,
+                            dim_rows = dimension_rows,
+                            dim_cols = dimension_cols,
+                            num_v_fold = int(num_v_fold),
+                            num_h_fold = int(num_h_fold),
+                            ifmap_h = ifmap_h, ifmap_w= ifmap_w,
+                            filt_h= filt_h, filt_w= filt_w,
+                            num_channels= num_channels, stride=strides,
+                            ofmap_h= int(E_h), ofmap_w= int(E_w), num_filters = num_filt,
+                            filt_base= filt_base, ifmap_base= ifmap_base,
+                            sram_read_trace_file= sram_read_trace_file
+                            )
 
     write_cycles = gen_write_trace(
                         cycle = cycles,
@@ -63,7 +63,7 @@ def sram_traffic(
                         )
 
     cycles = max(read_cycles, write_cycles)
-    return(cycles)
+    return(cycles, util)
 # End of sram_traffic()
 
         
@@ -106,6 +106,10 @@ def gen_read_trace(
     lane_done       = []
     v_fold_barrier  = []
 
+    # Variables for utilization calculation
+    rows_used = 0
+    cols_used = 0
+    util      = 0
 
     # This initialization assumes num_rows << num_ofmap_px
     # The assignement logic needs to be modified if that is not the case
@@ -159,6 +163,8 @@ def gen_read_trace(
     while(ifmap_done == False) or (filt_done == False):
         ifmap_read = ""
         filt_read  = ""
+        rows_used = 0
+        cols_used = 0
         
         # Generate address for ifmap
         for r in range(dim_rows):
@@ -171,6 +177,7 @@ def gen_read_trace(
                 addr_col_offset = inc % rc
                 ifmap_addr = row_base_addr[r] + addr_row_offset + addr_col_offset 
                 ifmap_read += str(int(ifmap_addr)) + ", "
+                rows_used += 1
             else:
                 ifmap_read += ", "
 
@@ -239,7 +246,8 @@ def gen_read_trace(
                 inc = col_clk_offset[c]
                 
                 filt_addr = col_base_addr[c] + inc + filt_base 
-                filt_read += str(filt_addr) + ", " 
+                filt_read += str(filt_addr) + ", "
+                cols_used += 1
             else:
                 filt_read += ", "
 
@@ -285,6 +293,9 @@ def gen_read_trace(
         entry = str(global_cycle) + ", " + ifmap_read + filt_read + "\n"
         outfile.write(entry)
 
+        this_util = (rows_used * cols_used) / (dim_rows * dim_cols)
+        util += this_util
+
         # Update tracking variables
         local_cycle += 1
 
@@ -292,7 +303,9 @@ def gen_read_trace(
     outfile.close()
     #ofmap_out.close()
 
-    return (local_cycle + cycle)
+    util_perc = (util / local_cycle) * 100
+
+    return (local_cycle + cycle), util_perc
 # End of gen_read_trace()
 
 
