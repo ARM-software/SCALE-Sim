@@ -376,7 +376,7 @@ def gen_write_trace(
 
             # In case of vertical fold we have to track when the output of (0,0) is generated
             # Shifting back local cycles to capture the last OFMAP generation in (0,0) for this fold
-            last_fold_cycle   = local_cycle
+            last_fold_cycle   = local_cycle + active_row
             local_cycle -= (active_row + active_col - 1)
 
             # There are more OFMAP channels to go
@@ -396,7 +396,8 @@ def gen_write_trace(
 
                 local_cycle += r2c + active_col
                 if local_cycle < last_fold_cycle:
-                    local_cycle = last_fold_cycle + 1
+                    local_cycle = last_fold_cycle
+
 
             else:   # Restore the local cycle to return to the main function
                 local_cycle += (active_row + active_col)
