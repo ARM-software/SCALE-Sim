@@ -162,7 +162,20 @@ def sram_traffic(
                             )
             cycles = max(cycles_ifmap, cycles_ofmap)
 
-            util_this_fold = (rows_this_fold * cols_this_fold) /(dimension_rows * dimension_cols)
+            # Since multiple filters are being mapped on a single col due to large number of rows
+            # util calculation is a little involved,
+            # cols_this_fold --> number of filters mapped this fold
+            rem = cols_this_fold
+            tmp_util = 0
+            for _ in range(parallel_window):
+                col_used = min(rem, dimension_cols)
+                row_used = r2c                      # Number of row used will always be in multiple of r2c,
+                                                    # parallel window calc took care of this
+                tmp_util += row_used * col_used
+                rem -= col_used
+
+            #util_this_fold = (rows_this_fold * cols_this_fold) /(dimension_rows * dimension_cols)
+            util_this_fold = tmp_util /(dimension_rows * dimension_cols)
             util += util_this_fold * cycles_ifmap
             compute_cycles += cycles_ifmap
 
