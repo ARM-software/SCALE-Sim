@@ -19,7 +19,7 @@ Getting started is simple! SCALE-Sim is completely written in python. At the mom
 
 The config file scale.cfg contains two sections, achitecture presets and network presets.  
 Here is sample of the config file.  
-![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example_single.png "sample config")    
+![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example.png "sample config")    
 Architecture presets are the variable parameters for SCALE-Sim, like array size, memory etc.  
 
 Network preset contains just one field for now, that is the path to the topology csv file.  
