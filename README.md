@@ -32,6 +32,7 @@ Given a convolution neural network topology and certain architecture parameters,
 SCALE sim is capable of estimating the following:
 
 * Run time in cycles
+* Average utilization
 * On-chip memory requirements
 * Off-chip interface bandwidth requirements
 
@@ -90,7 +91,7 @@ Getting started is simple! SCALE-Sim is completely written in python. At the mom
 
 The config file scale.cfg contains two sections, achitecture presets and network presets.  
 Here is sample of the config file.  
-![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example_single.png "sample config")    
+![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example.png "sample config")    
 Architecture presets are the variable parameters for SCALE-Sim, like array size, memory etc.  
 
 Network preset contains just one field for now, that is the path to the topology csv file.  
@@ -110,11 +111,16 @@ Here is an example output dumped to stdout when running Yolo tiny (whose configu
 Also, the simulator generates read write traces and summary logs at ```./outputs/<topology_name>```.
 There are three summary logs:
 
-* Layer wise runtime information.
-* Layer wise MAX DRAM bandwidth log.
-* Layer wise AVG DRAM bandwidth log.
+* Layer wise runtime and average utilization
+* Layer wise MAX DRAM bandwidth log
+* Layer wise AVG DRAM bandwidth log
+* Layer wise breakdown of data movement and compute cycles
 
 In addition cycle accurate SRAM/DRAM access logs are also dumped and could be accesses at ```./outputs/<topology_name>/layer_wise```
+
+### Detailed Documentation
+
+For detailed insights on working of SCALE-Sim, you can refer to this [paper](https://github.com/AnandS09/SCALE-Sim/blob/master/images/paper/fullpaper.pdf)
 
 ## Contributing
 
