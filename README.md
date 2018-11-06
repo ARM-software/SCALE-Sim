@@ -132,7 +132,7 @@ Please send a [pull request](https://help.github.com/articles/creating-a-pull-re
 
 [Yuhao Zhu](http://yuhaozhu.com), University of Rochester
 
-Paul Whatmough, Arm Research, Boston, MA
+[Paul Whatmough](https://www.linkedin.com/in/paul-whatmough-2062729/), Arm Research, Boston, MA
 
 ## License
 
