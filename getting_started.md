@@ -39,8 +39,12 @@ Here is an example output dumped to stdout when running Yolo tiny (whose configu
 Also, the simulator generates read write traces and summary logs at ```./outputs/<topology_name>```.
 There are three summary logs:
 
-* Layer wise runtime information.
-* Layer wise MAX DRAM bandwidth log.
-* Layer wise AVG DRAM bandwidth log.
+* Layer wise runtime and average utilization
+* Layer wise MAX DRAM bandwidth log
+* Layer wise AVG DRAM bandwidth log
+* Layer wise breakdown of data movement and compute cycles
 
 In addition cycle accurate SRAM/DRAM access logs are also dumped and could be accesses at ```./outputs/<topology_name>/layer_wise```
+
+## Detailed Documentation
+For detailed insights on using SCALE-Sim, you can refer to this ![paper](https://github.com/AnandS09/SCALE-Sim/blob/master/images/paper/fullpaper.pdf "paper")
