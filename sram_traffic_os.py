@@ -113,7 +113,7 @@ def gen_read_trace(
     util      = 0
 
     # This initialization assumes num_rows << num_ofmap_px
-    # The assignement logic needs to be modified if that is not the case
+    # The assignment logic needs to be modified if that is not the case
     for r in range(dim_rows):
         base_row_id = math.floor(r / ofmap_w) * stride
         base_col_id = r % ofmap_w * stride
@@ -336,6 +336,7 @@ def gen_write_trace(
     active_row = min(dim_rows, e2)
     active_col = min(dim_cols, num_filters)
     local_cycle = 0
+    sticky_flag = False     # This flag is in place to fix the OFMAP cycle shaving bug
 
     for r in range(active_row):
         id_row.append(r)
@@ -378,6 +379,7 @@ def gen_write_trace(
             # Shifting back local cycles to capture the last OFMAP generation in (0,0) for this fold
             last_fold_cycle   = local_cycle + active_row
             local_cycle -= (active_row + active_col - 1)
+            sticky_flag = True
 
             # There are more OFMAP channels to go
             if remaining_filt > 0:
@@ -400,12 +402,18 @@ def gen_write_trace(
 
 
             else:   # Restore the local cycle to return to the main function
-                local_cycle += (active_row + active_col)
+                local_cycle = last_fold_cycle
+                #local_cycle += (active_row + active_col)
+                #sticky_flag = False
 
         else:   # If this is not a vertical fold then it is business as usual
             local_cycle += max(r2c, active_row)
 
     outfile.close()
+
+    #if sticky_flag:
+    #    local_cycle += (active_row + active_col)
+    #    sticky_flag = False
 
     return(local_cycle + cycle)
 # End of gen_write_trace()

@@ -5,10 +5,9 @@ import run_nets as r
 
 
 class scale:
-    def __init__(self):
-        self.sweep = False 
-        #self.save_space = True
-        self.save_space = False
+    def __init__(self, sweep = False, save = False):
+        self.sweep = sweep 
+        self.save_space = save 
 
     def parse_config(self):
         general = 'general'
@@ -63,6 +62,15 @@ class scale:
     
         self.dataflow= config.get(arch_sec, 'Dataflow')
     
+        ifmap_offset = config.get(arch_sec, 'IfmapOffset')
+        self.ifmap_offset = int(ifmap_offset.strip())
+
+        filter_offset = config.get(arch_sec, 'FilterOffset')
+        self.filter_offset = int(filter_offset.strip())
+
+        ofmap_offset = config.get(arch_sec, 'OfmapOffset')
+        self.ofmap_offset = int(ofmap_offset.strip())
+
         ## Read network_presets
         ## For now that is just the topology csv filename
         topology_file = config.get(net_sec, 'TopologyCsvLoc')
@@ -70,13 +78,21 @@ class scale:
 
 
     def run_scale(self):
+        self.parse_config()
 
         if self.sweep == False:
-            self.parse_config()
+            self.run_once()
+        else:
+            self.run_sweep()
+
+
+    def run_once(self):
 
         df_string = "Output Stationary"
         if self.dataflow == 'ws':
             df_string = "Weight Stationary"
+        elif self.dataflow == 'is':
+            df_string = "Input Stationary"
 
         print("====================================================")
         print("******************* SCALE SIM **********************")
@@ -91,6 +107,7 @@ class scale:
 
         net_name = self.topology_file.split('/')[-1].split('.')[0]
         #print("Net name = " + net_name)
+        offset_list = [self.ifmap_offset, self.filter_offset, self.ofmap_offset]
         
         r.run_net(  ifmap_sram_size  = int(self.isram_min),
                     filter_sram_size = int(self.fsram_min),
@@ -99,7 +116,8 @@ class scale:
                     array_w = int(self.ar_w_min),
                     net_name = net_name,
                     data_flow = self.dataflow,
-                    topology_file = self.topology_file
+                    topology_file = self.topology_file,
+                    offset_list = offset_list
                 )
         self.cleanup()
         print("************ SCALE SIM Run Complete ****************") 
@@ -144,32 +162,31 @@ class scale:
 
 
     def run_sweep(self):
-        self.parse_config()
-        self.sweep = True
 
-        data_flow_list = ['os', 'ws']
-        #arr_h_list = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
-        #arr_w_list = [16384, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
-        #ifmap_sram_list = [256, 512, 1024]
-        #filter_sram_list = [256, 512, 1024]
-        #ofmap_sram_list = [128, 256, 512]
+        all_data_flow_list = ['os', 'ws', 'is']
+        all_arr_dim_list = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
+        all_sram_sz_list = [256, 512, 1024]
 
+        data_flow_list = all_data_flow_list[1:]
+        arr_h_list = all_arr_dim_list[3:8]
+        arr_w_list = all_arr_dim_list[3:8]
+        #arr_w_list = list(reversed(arr_h_list))
+        
+        net_name = self.topology_file.split('/')[-1].split('.')[0]
         for df in data_flow_list:
             self.dataflow = df
 
-            #for i in range(len(arr_h_list)):
-            #    self.ar_h_min = arr_h_list[i]
-            #    self.ar_w_min = arr_w_list[i]
+            for i in range(len(arr_h_list)):
+                self.ar_h_min = arr_h_list[i]
+                self.ar_w_min = arr_w_list[i]
 
-            net_name = self.topology_file.split('/')[-1].split('.')[0]
-            self.run_name = net_name + "_" + df + "_" + self.ar_h_min + "x" + self.ar_w_min 
+                self.run_name = net_name + "_" + df + "_" + str(self.ar_h_min) + "x" + str(self.ar_w_min)
 
-            self.run_scale()
+                self.run_once()
 
 
 if __name__ == "__main__":
-    s = scale()
+    s = scale(save = False, sweep = False)
     s.run_scale()
-    #s.run_sweep()
 
     
