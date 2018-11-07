@@ -2,6 +2,12 @@ import os
 import time
 import configparser as cp
 import run_nets as r
+from absl import flags
+from absl import app
+
+FLAGS = flags.FLAGS
+#name of flag | default | explanation
+flags.DEFINE_string("arch_config","./configs/scale.cfg","file where we are getting our architechture from")
 
 
 class scale:
@@ -184,9 +190,14 @@ class scale:
 
                 self.run_once()
 
-
-if __name__ == "__main__":
+def main(argv):
     s = scale(save = False, sweep = False)
     s.run_scale()
 
-    
+if __name__ == '__main__':
+  app.run(main)
+'''
+if __name__ == "__main__":
+    s = scale(save = False, sweep = False)
+    s.run_scale()
+'''
