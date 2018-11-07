@@ -19,7 +19,9 @@ class scale:
         general = 'general'
         arch_sec = 'architecture_presets'
         net_sec  = 'network_presets'
-        config_filename = "./scale.cfg"
+       # config_filename = "./scale.cfg"
+        config_filename = FLAGS.arch_config
+        print("Using Architechture from ",config_filename)
     
         config = cp.ConfigParser()
         config.read(config_filename)
