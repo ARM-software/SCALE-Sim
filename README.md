@@ -95,7 +95,7 @@ It will also run alexnet as its network topology.
 The config file scale.cfg contains achitecture presets.  
 
 In order to change a different arichtechture/network, crate a new .cfg file inside ```cofigs``` and call a new network by running
-```python scale.py -arch_config=configs/eyeriss.cfg -network/yolo.csv```
+```python scale.py -arch_config=configs/eyeriss.cfg -network=topologies/yolo.csv```
 Here is sample of the config file.  
 ![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example.png "sample config")    
 Architecture presets are the variable parameters for SCALE-Sim, like array size, memory etc.  
