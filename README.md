@@ -84,17 +84,16 @@ Getting started is simple! SCALE-Sim is completely written in python. At the mom
 * absl-py
 
 
-### Costum Experiment
-####Vanilla Version
-This experiment will run the default MLPERF_AlphaGoZero_32x32_os architechture contained inside scale.cfg. I=
+### Custome Experiment
+This experiment will run the default MLPERF_AlphaGoZero_32x32_os architechture contained inside scale.cfg. 
 It will also run alexnet as its network topology.
-* Fill in the config file, scale.cfg with proper values. 
 * Run the command: ```python scale.py```
 * Wait for the run to finish
 
-The config file scale.cfg contains achitecture presets.  
+The config file inside configs contain achitecture presets.  
+the csv files inside toologies contain different networks
 
-In order to change a different arichtechture/network, crate a new .cfg file inside ```cofigs``` and call a new network by running
+In order to change a different arichtechture/network, create a new .cfg file inside ```cofigs``` and call a new network by running
 ```python scale.py -arch_config=configs/eyeriss.cfg -network=topologies/yolo.csv```
 Here is sample of the config file.  
 ![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example.png "sample config")    
