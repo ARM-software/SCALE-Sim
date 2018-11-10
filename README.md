@@ -125,7 +125,7 @@ In addition cycle accurate SRAM/DRAM access logs are also dumped and could be ac
 
 ### Detailed Documentation
 
-For detailed insights on working of SCALE-Sim, you can refer to this [paper](https://github.com/AnandS09/SCALE-Sim/blob/master/images/paper/fullpaper.pdf)
+For detailed insights on working of SCALE-Sim, you can refer to this [paper](https://arxiv.org/abs/1811.02883)
 
 ## Contributing
 
