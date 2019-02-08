@@ -83,8 +83,9 @@ Getting started is simple! SCALE-Sim is completely written in python. At the mom
 * tqdm
 * absl-py
 
+*NOTE: SCALE-Sim needs python3 to run correctly. If you are using python2, you might run into typecasting errors* 
 
-### Custome Experiment
+### Custom Experiment
 This experiment will run the default MLPERF_AlphaGoZero_32x32_os architechture contained inside scale.cfg. 
 It will also run alexnet as its network topology.
 * Run the command: ```python scale.py```
@@ -126,6 +127,19 @@ In addition cycle accurate SRAM/DRAM access logs are also dumped and could be ac
 ### Detailed Documentation
 
 For detailed insights on working of SCALE-Sim, you can refer to this [paper](https://arxiv.org/abs/1811.02883)
+
+## Citing
+
+If you find this tool useful for your research, please use the following bibtex to cite us,
+
+```
+@article{samajdar2018scale,
+  title={SCALE-Sim: Systolic CNN Accelerator Simulator},
+  author={Samajdar, Ananda and Zhu, Yuhao and Whatmough, Paul and Mattina, Matthew and Krishna, Tushar},
+  journal={arXiv preprint arXiv:1811.02883},
+  year={2018}
+}
+```
 
 ## Contributing
 
