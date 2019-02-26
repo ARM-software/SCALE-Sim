@@ -8,7 +8,7 @@ from absl import app
 FLAGS = flags.FLAGS
 #name of flag | default | explanation
 flags.DEFINE_string("arch_config","./configs/scale.cfg","file where we are getting our architechture from")
-flags.DEFINE_string("network","./topologies/alexnet.csv","topology that we are reading")
+flags.DEFINE_string("network","./topologies/conv_nets/alexnet.csv","topology that we are reading")
 
 
 class scale:
