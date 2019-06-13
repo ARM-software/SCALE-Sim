@@ -43,13 +43,13 @@ def sram_traffic(
 
     reqd_cols = num_filt                    # Total number of cols to be mapped
     max_cols_per_v_fold = max_parallel_window * dimension_cols
-    num_v_folds = math.ceil(reqd_cols / max_cols_per_v_fold)
+    num_v_fold = math.ceil(reqd_cols / max_cols_per_v_fold)
     
     remaining_cols = reqd_cols
     cycles = 0
     prev_cycl = 0
 
-    #print("Vertical folds = " +str(num_v_folds))
+    #print("Vertical folds = " +str(num_v_fold))
    
     # These are the starting addresses of filter weights in the memory 
     all_col_addr_list = []
@@ -64,7 +64,7 @@ def sram_traffic(
         addr = (px / E_w) * strides * hc + (px%E_w) * strides
         all_ifmap_base_addr.append(addr)
 
-    for v in tqdm(range(int(num_v_folds))):
+    for v in tqdm(range(int(num_v_fold))):
         #print("V fold id: " + str(v))
             
         # Take a slice of the starting addresses that are relevant for this v_fold 
