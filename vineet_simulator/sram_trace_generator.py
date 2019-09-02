@@ -1,10 +1,23 @@
 import numpy as np
+import multiprocessing as mp
+from multiprocessing import Array, Process
 
 # output is the ifmap trace, filter trace, and ofmap
 # hyper parameters: systolic array size (cols, rows)
 # hyper_parameter: s1 (pixels in filter)
 # hyper_parameter: s2 (# of filters)
 # hyper_parameter: T (ofmap pixels in one channel (=(ifmap_rows-filter_rows+stride)/stride))
+
+
+def read_filters(i, j, s1, filter):
+    filter_base = 1000
+    filter[i*s1 + j] = filter_base + i * s1 + j
+
+def read_ifmap(i, j, self.T, self.stride, ifmap, temp_ifmap):
+
+
+
+
 class simulation:
     def __init__(self, s2, T):
         self.left_column = np.zeros((1, T))
@@ -75,20 +88,31 @@ class sram_trace_generator:
 
 
     def read_trace_arrays_os(self):
-        filter = np.zeros((self.s2, self.s1))
+        filter = Array('i', self.s1*self.s2)
+            #np.zeros((self.s2, self.s1))
         filter_base = 0
+        jobs = []
         # populate the filter input matrix
         for i in range(self.s2):
             for j in range(self.s1):
-                filter[i][j] = filter_base + i*self.s1 + j
-
+                process = Process(target=read_filters, args=(i, j, self.s1, filter))
+                jobs.append(process)
+        for j in jobs:
+            j.start()
+        for j in jobs:
+            j.join()
+        filter = np.reshape(filter[:], (self.s2, self.s1))
+        print(filter)
         # populate the ifmap input matrix
-        ifmap = np.zeros((self.T, self.s1))
+        #ifmap = np.zeros((self.T, self.s1))
+        filter = Array('i', self.T*self.s1)
         input_base = 0
         temp_ifmap = input_base
         first_address = temp_ifmap
         for i in range(self.T):
             for j in range(self.s1):
+                process = Process(target=read_ifmap, args=(i, j, self.T, self.stride, ifmap, temp_ifmap))
+                jobs.append(process)
                 ifmap[i][j] = temp_ifmap
                 temp_ifmap = temp_ifmap + 1
                 if (j + 1) % self.ofmap_w == 0:
@@ -99,6 +123,7 @@ class sram_trace_generator:
                 first_address = first_address + self.stride
             temp_ifmap = first_address
         return ifmap, filter
+
 
 if __name__ == "__main__":
     s = sram_trace_generator()
@@ -116,23 +141,3 @@ if __name__ == "__main__":
     print(output)
     print("Outputs Unskewed: ")
     print(unskewedOutput)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
