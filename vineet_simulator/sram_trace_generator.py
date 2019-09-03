@@ -28,7 +28,8 @@ class sram_trace_generator:
         self.T = self.ofmap_h * self.ofmap_w
 
     def simulate_sram_trace(self, input, filter):
-        output = np.ones((self.T + self.s2 - 1, self.s2))*(-1)
+        #output = np.ones((self.T + self.s2 - 1, self.s2))*(-1)
+        output = np.zeros((self.T, self.s2))
         outputBase = 0
         outputPixel = outputBase
         simArray = []
@@ -39,22 +40,31 @@ class sram_trace_generator:
             if cycle < min(len(input[0]), len(filter[0])):
                 sim = simulation(s2=self.s2, T=self.T)
                 sim.left_column = np.transpose(input[:, cycle])
+                print("Inputs at Cycle " + str(cycle) + ":")
+                print(sim.left_column)
                 sim.top_row = np.transpose(filter[:, cycle])
+                print("Filters at Cycle " + str(cycle) + ":")
+                print(sim.top_row)
                 simArray.append(sim)
-            outputCycle = cycle - self.s1
-            if outputCycle == 0:
-                start = True
-            elif outputCycle == self.T:
-                increasing = False
-            if start:
-                if increasing:
-                    filtersArray.append(len(filtersArray))
-                elif len(filtersArray) > 0:
-                    filtersArray.pop(0)
-                    outputPixel = outputPixel + self.T - 1
-                for i in range(len(filtersArray)):
-                    output[outputCycle][filtersArray[i]] = outputPixel + ((self.T - 1) * i)
-                outputPixel = outputPixel + 1
+            # outputCycle = cycle - self.s1
+            # if outputCycle == 0:
+            #     start = True
+            # elif outputCycle == self.T:
+            #     increasing = False
+            # if start:
+            #     if increasing:
+            #         filtersArray.append(len(filtersArray))
+            #     elif len(filtersArray) > 0:
+            #         filtersArray.pop(0)
+            #         outputPixel = outputPixel + self.T - 1
+            #     for i in range(len(filtersArray)):
+            #         output[outputCycle][filtersArray[i]] = outputPixel + ((self.T - 1) * i)
+            #     outputPixel = outputPixel + 1
+
+        for i in range(self.s2):
+            for j in range(self.T):
+                output[j][i] = i*self.T + j
+
         return simArray, output
 
 
@@ -106,13 +116,14 @@ if __name__ == "__main__":
     input = s.skewMat(ifmap)
     filter = s.skewMat(filter)
     (simArray, output) = s.simulate_sram_trace(input, filter)
-    unskewedOutput = s.noSkewMat(output)
-    for i in range(len(simArray)):
-        print("Inputs at Cycle " + str(i) + ":")
-        print(simArray[i].left_column)
-        print("Filters at Cycle " + str(i) + ":")
-        print(simArray[i].top_row)
-    print("Outputs Skewed: ")
-    print(output)
+    #unskewedOutput = s.noSkewMat(output)
+    skewedOutput = s.skewMat(output)
+    # for i in range(len(simArray)):
+    #     print("Inputs at Cycle " + str(i) + ":")
+    #     print(simArray[i].left_column)
+    #     print("Filters at Cycle " + str(i) + ":")
+    #     print(simArray[i].top_row)
     print("Outputs Unskewed: ")
-    print(unskewedOutput)
+    print(output)
+    print("Outputs Skewed: ")
+    print(skewedOutput)
