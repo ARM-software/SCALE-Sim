@@ -12,8 +12,8 @@ class simulation:
 
 
 class sram_trace_generator:
-    def __init__(self, stride=1, filt_h=2, filt_w=2,
-                 ifmap_h=3, ifmap_w=3, num_filters=4, num_channels=1):
+    def __init__(self, stride=1, filt_h=3, filt_w=3,
+                 ifmap_h=5, ifmap_w=5, num_filters=4, num_channels=1):
         self.stride = stride  # input
         self.filt_h = filt_h  # input
         self.filt_w = filt_w  # input
@@ -101,29 +101,24 @@ class sram_trace_generator:
             for j in range(self.s1):
                 ifmap[i][j] = temp_ifmap
                 if (j + 1) % self.filt_w == 0:
-                    temp_ifmap = int(temp_ifmap/self.ifmap_w) + self.ifmap_w
+                    temp_ifmap = int(temp_ifmap/self.ifmap_w)*self.ifmap_w + self.ifmap_w + (first_address % self.ifmap_w)
                 else:
                     temp_ifmap = temp_ifmap + 1
-            if (first_address + self.stride + self.filt_w) > self.ifmap_w:
-                first_address = int(first_address/self.ifmap_w) + self.ifmap_w
+            if (first_address % self.ifmap_w + self.stride + self.filt_w) > self.ifmap_w:
+                first_address = int(first_address/self.ifmap_w)*self.ifmap_w + self.ifmap_w
             else:
                 first_address = first_address + self.stride
             temp_ifmap = first_address
         return ifmap, filter
 
 if __name__ == "__main__":
-    s = sram_trace_generator(stride=3)
+    s = sram_trace_generator()
     (ifmap, filter) = s.read_trace_arrays_os()
     input = s.skewMat(ifmap)
     filter = s.skewMat(filter)
     (simArray, output) = s.simulate_sram_trace(input, filter)
     #unskewedOutput = s.noSkewMat(output)
     skewedOutput = s.skewMat(output)
-    # for i in range(len(simArray)):
-    #     print("Inputs at Cycle " + str(i) + ":")
-    #     print(simArray[i].left_column)
-    #     print("Filters at Cycle " + str(i) + ":")
-    #     print(simArray[i].top_row)
     print("Outputs Unskewed: ")
     print(output)
     print("Outputs Skewed: ")
