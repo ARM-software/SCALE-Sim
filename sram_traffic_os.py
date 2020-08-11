@@ -9,7 +9,8 @@ def sram_traffic(
         ifmap_h=7, ifmap_w=7,
         filt_h=3, filt_w=3,
         num_channels=3,
-        strides=1, num_filt=8,
+        stride_h=1, stride_w=1,
+        num_filt=8,
         ofmap_base=2000000, filt_base=1000000, ifmap_base=0,
         sram_read_trace_file="sram_read.csv",
         sram_write_trace_file="sram_write.csv"
@@ -17,8 +18,8 @@ def sram_traffic(
 
 
     # Dimensions of output feature map channel
-    E_h = (ifmap_h - filt_h + strides) / strides
-    E_w = (ifmap_w - filt_w + strides) / strides
+    E_h = math.floor((ifmap_h - filt_h + stride_h) / stride_h)
+    E_w = math.floor((ifmap_w - filt_w + stride_w) / stride_w)
     
     # Number of pixels in one convolution window
     px_per_conv_window = filt_h * filt_w * num_channels
@@ -43,7 +44,7 @@ def sram_traffic(
                             num_h_fold = int(num_h_fold),
                             ifmap_h = ifmap_h, ifmap_w= ifmap_w,
                             filt_h= filt_h, filt_w= filt_w,
-                            num_channels= num_channels, stride=strides,
+                            num_channels= num_channels, stride_h=stride_h, stride_w=stride_w,
                             ofmap_h= int(E_h), ofmap_w= int(E_w), num_filters = num_filt,
                             filt_base= filt_base, ifmap_base= ifmap_base,
                             sram_read_trace_file= sram_read_trace_file
@@ -76,7 +77,7 @@ def gen_read_trace(
         num_h_fold = 1,
         ifmap_h = 7, ifmap_w = 7,
         filt_h = 3, filt_w =3,
-        num_channels = 3, stride = 1,
+        num_channels = 3, stride_h = 1, stride_w=1,
         ofmap_h =5, ofmap_w = 5, num_filters = 8, 
         filt_base = 1000000, ifmap_base = 0,
         sram_read_trace_file = "sram_read.csv",
@@ -115,8 +116,8 @@ def gen_read_trace(
     # This initialization assumes num_rows << num_ofmap_px
     # The assignment logic needs to be modified if that is not the case
     for r in range(dim_rows):
-        base_row_id = math.floor(r / ofmap_w) * stride
-        base_col_id = r % ofmap_w * stride
+        base_row_id = math.floor(r / ofmap_w) * stride_h
+        base_col_id = r % ofmap_w * stride_w
         base_addr  = base_row_id * hc + base_col_id * num_channels 
 
         if r < e2:
@@ -195,8 +196,8 @@ def gen_read_trace(
                 if ofmap_idx < e2:
                     row_clk_offset[r] = 0
 
-                    base_row_id = math.floor(ofmap_idx / ofmap_w) * stride
-                    base_col_id = ofmap_idx % ofmap_w * stride
+                    base_row_id = math.floor(ofmap_idx / ofmap_w) * stride_h
+                    base_col_id = ofmap_idx % ofmap_w * stride_w
                     base_addr  = base_row_id * hc + base_col_id * num_channels
                     row_base_addr[r] = base_addr
 
@@ -207,8 +208,8 @@ def gen_read_trace(
                     if(v_fold_row[r] < num_v_fold):
                         row_ofmap_idx[r]  = r
 
-                        base_row_id = math.floor(r / ofmap_w) * stride
-                        base_col_id = r % ofmap_w * stride
+                        base_row_id = math.floor(r / ofmap_w) * stride_h
+                        base_col_id = r % ofmap_w * stride_w
                         base_addr  = base_row_id * hc + base_col_id * num_channels
                         row_base_addr[r]  = base_addr
 
@@ -425,6 +426,6 @@ if __name__ == "__main__":
        dimension_cols = 4,
        ifmap_h = 7, ifmap_w = 7,
        filt_h = 2, filt_w = 2,
-       num_channels = 1, strides = 1,
+       num_channels = 1, stride_h = 1, stride_w=1,
        num_filt = 7
    )

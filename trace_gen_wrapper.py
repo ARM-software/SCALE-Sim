@@ -10,7 +10,8 @@ def gen_all_traces(
         ifmap_h = 7, ifmap_w = 7,
         filt_h  = 3, filt_w = 3,
         num_channels = 3,
-        strides = 1, num_filt = 8,
+        stride_h = 1, stride_w = 1, 
+        num_filt = 8,
 
         data_flow = 'os',
 
@@ -38,7 +39,8 @@ def gen_all_traces(
                 ifmap_h=ifmap_h, ifmap_w=ifmap_w,
                 filt_h=filt_h, filt_w=filt_w,
                 num_channels=num_channels,
-                strides=strides, num_filt=num_filt,
+                stride_h=stride_h, stride_w = stride_w,
+                num_filt=num_filt,
                 filt_base=filt_base, ifmap_base=ifmap_base,
                 ofmap_base = ofmap_base,
                 sram_read_trace_file=sram_read_trace_file,
@@ -52,7 +54,8 @@ def gen_all_traces(
                 ifmap_h = ifmap_h, ifmap_w = ifmap_w,
                 filt_h = filt_h, filt_w = filt_w,
                 num_channels = num_channels,
-                strides = strides, num_filt = num_filt,
+                stride_h = stride_h, stride_w = stride_w,
+                num_filt = num_filt,
                 ofmap_base = ofmap_base, filt_base = filt_base, ifmap_base = ifmap_base,
                 sram_read_trace_file = sram_read_trace_file,
                 sram_write_trace_file = sram_write_trace_file
@@ -65,7 +68,8 @@ def gen_all_traces(
                 ifmap_h = ifmap_h, ifmap_w = ifmap_w,
                 filt_h = filt_h, filt_w = filt_w,
                 num_channels = num_channels,
-                strides = strides, num_filt = num_filt,
+                stride_h = stride_h, stride_w = stride_w,
+                num_filt = num_filt,
                 ofmap_base = ofmap_base, filt_base = filt_base, ifmap_base = ifmap_base,
                 sram_read_trace_file = sram_read_trace_file,
                 sram_write_trace_file = sram_write_trace_file
@@ -406,8 +410,7 @@ def test():
         array_w = dimensions,
         ifmap_h= ifmap_h, ifmap_w= ifmap_w, num_channels=num_channels,
         filt_h= filt_h, filt_w= filt_w, num_filt= num_filters,
-        strides= strides,
-
+        stride_h= strides, stride_w = strides,
         filter_sram_size= filter_sram_size, ifmap_sram_size= ifmap_sram_size, ofmap_sram_size= ofmap_sram_size,
         word_size_bytes= word_sz, filt_base= filter_base, ifmap_base= ifmap_base,
 

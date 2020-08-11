@@ -8,15 +8,16 @@ def sram_traffic(
         ifmap_h=7, ifmap_w=7,
         filt_h=3, filt_w=3,
         num_channels=3,
-        strides=1, num_filt=8,
+        stride_h=1, stride_w = 1,
+        num_filt=8,
         ofmap_base=2000000, filt_base=1000000, ifmap_base=0,
         sram_read_trace_file="sram_read.csv",
         sram_write_trace_file="sram_write.csv"
     ):
 
     # Dimensions of output feature map channel
-    E_h = math.floor((ifmap_h - filt_h + strides) / strides)
-    E_w = math.floor((ifmap_w - filt_w + strides) / strides)
+    E_h = math.floor((ifmap_h - filt_h + stride_h) / stride_h)
+    E_w = math.floor((ifmap_w - filt_w + stride_w) / stride_w)
     
     # Number of pixels in one convolution window
     px_per_conv_window = filt_h * filt_w * num_channels
@@ -54,7 +55,7 @@ def sram_traffic(
     # These are the starting addresses of ifmap windows in the memory 
     all_ifmap_base_addr_list = []
     for px in range(int(e2)):
-        addr = int(px / E_w) * strides * hc + (px%E_w) * strides * num_channels
+        addr = math.floor(px / E_w) * stride_h * hc + (px%E_w) * stride_w * num_channels
         all_ifmap_base_addr_list.append(addr)
 
     # These are the starting addresses of filter windows in the memory
@@ -76,6 +77,7 @@ def sram_traffic(
         if num_h_fold > 1:
 
             rem_h = r2c
+            all_filt_addr_list_temp = all_filt_addr_list.copy()
 
             for h in range(num_h_fold):
                 rows_this_fold = min(rem_h, dimension_rows)
@@ -96,13 +98,13 @@ def sram_traffic(
 
                 data_out_cycles = cycles_i
 
-                cycles_f, all_filt_addr_list =\
+                cycles_f, all_filt_addr_list_temp =\
                     gen_trace_filter_partial(
                         cycle = cycles_i,
                         h_fold = h, v_fold = v,
                         num_rows = dimension_rows, num_cols= dimension_cols,
                         num_filters= num_filt,
-                        filt_addr_list= all_filt_addr_list,
+                        filt_addr_list= all_filt_addr_list_temp,
                         active_rows= rows_this_fold, active_cols= cols_this_fold,
                         ofmap_base_addr= ofmap_base,
                         sram_read_trace_file= sram_read_trace_file
@@ -494,7 +496,8 @@ if __name__ == "__main__":
         ifmap_h= h_h, ifmap_w= h_w,
         filt_h= r_h, filt_w= r_w,
         num_channels= c,
-        strides= u,
+        stride_h = u,
+        stride_w = u,
 
         num_filt= m
     )
