@@ -57,7 +57,7 @@ def run_net( ifmap_sram_size=1,
         #print(len(elems))
         
         # Do not continue if incomplete line
-        if len(elems) < 8:
+        if len(elems) < 9:
             continue
 
         name = elems[0]
@@ -73,10 +73,10 @@ def run_net( ifmap_sram_size=1,
         num_channels = int(elems[5])
         num_filters = int(elems[6])
 
-        if len(elems) == 9:
+        if len(elems) == 10:
             stride_h = int(elems[7])
             stride_w = int(elems[8])
-        elif len(elems) == 8:
+        elif len(elems) == 9:
             stride_h = int(elems[7])
             stride_w = int(elems[7])
 
