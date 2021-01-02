@@ -379,8 +379,8 @@ def gen_trace_ifmap_partial(
     r2c = filt_h * filt_w * num_channels
     rc = filt_w * num_channels
     hc = ifmap_w * num_channels
-    E_w = (ifmap_w - filt_w + stride) / stride 
-    E_h = (ifmap_h - filt_h + stride) / stride 
+    E_w = math.floor((ifmap_w - filt_w + stride) / stride )
+    E_h = math.floor((ifmap_h - filt_h + stride) / stride )
 
     num_ofmap_px = E_h * E_w
     index = r2c - remaining
