@@ -106,7 +106,7 @@ SCALE-Sim accepts topology csv in the format shown below.
 
 Since SCALE-Sim is a CNN simulator please do not provide any layers other than convolutional or fully connected in the csv.
 You can take a look at 
-[yolo_tiny.csv](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/topologies/yolo_tiny.csv)
+[yolo_tiny.csv](https://github.com/ARM-software/SCALE-Sim/blob/master/topologies/conv_nets/yolo_tiny.csv)
 for your reference.
 
 ### Output
