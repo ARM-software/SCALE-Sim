@@ -1,5 +1,4 @@
 *.log
 original_repo
-
-
+.gitignore
 __pycache__
