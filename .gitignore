@@ -1,4 +1,4 @@
 *.log
 original_repo
-.gitignore
+.idea
 __pycache__
